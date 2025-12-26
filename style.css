@@ -59,6 +59,29 @@ button:hover,
   background-color: rgb(107, 107, 107);
 }
 
+.tools {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  margin-top: 20px;
+}
+
+#eraserBtn {
+  margin-top: 0;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center text */
+  border: 2px solid white; /* Match color swatch border */
+  padding: 0 20px; /* Adjust padding to rely on flex centering */
+}
+
+#eraserBtn.active {
+  background-color: white;
+  color: black;
+  border-color: white; /* Keep border white so layout doesn't shift, or match bg */
+}
+
 #colorPicker {
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -68,7 +91,12 @@ button:hover,
   background-color: transparent;
   border: none;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 0;
+  padding: 0; /* Align padding */
+}
+
+#colorPicker::-webkit-color-swatch-wrapper {
+  padding: 0; /* Remove default padding */
 }
 
 #colorPicker::-webkit-color-swatch {

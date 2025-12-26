@@ -1,4 +1,5 @@
 let isDrawing = false;
+let isErasing = false;
 let currentColor = "#ffffff";
 
 document.body.addEventListener("mousedown", () => {
@@ -11,7 +12,7 @@ document.body.addEventListener("mouseup", () => {
 
 const container = document.createElement("div");
 container.classList.add("container");
-document.body.insertBefore(container, document.getElementById("colorPicker"));
+document.body.insertBefore(container, document.getElementById("tools"));
 
 container.addEventListener(
   "touchstart",
@@ -60,6 +61,13 @@ function changeColor(e) {
   if (e.type === "mouseover" && !isDrawing) return;
 
   const target = e.target;
+
+  if (isErasing) {
+    target.style.backgroundColor = "hsl(0, 0%, 20%)";
+    target.dataset.percent = 0;
+    return;
+  }
+
   let currentPercent = Number(target.dataset.percent || 0);
 
   if (currentPercent < 100) {
@@ -118,7 +126,18 @@ function handleTouch(e) {
 }
 
 const colorPicker = document.getElementById("colorPicker");
-colorPicker.oninput = (e) => (currentColor = e.target.value);
+const eraserBtn = document.getElementById("eraserBtn");
+
+colorPicker.oninput = (e) => {
+  currentColor = e.target.value;
+  isErasing = false;
+  eraserBtn.classList.remove("active");
+};
+
+eraserBtn.onclick = () => {
+  isErasing = !isErasing;
+  eraserBtn.classList.toggle("active");
+};
 
 let btn = document.getElementById("changeGridNumber");
 btn.addEventListener("click", () => {
