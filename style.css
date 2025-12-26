@@ -1,0 +1,55 @@
+html,
+body {
+  background-color: rgb(48, 48, 48);
+  height: 100%;
+  width: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  gap: 40px;
+}
+
+button,
+.changeGridNumber {
+  background-color: rgb(81, 81, 81);
+  color: white;
+  padding: 10px;
+  border-radius: 0px;
+  border: solid;
+  font-weight: bold;
+  margin-top: 20px;
+}
+button:hover,
+.changeGridNumber:hover {
+  border-color: rgb(255, 255, 255);
+  background-color: rgb(70, 70, 70);
+}
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  display: flex;
+  border: 1px solid white;
+  width: 90vmin;
+  height: 90vmin;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.cell {
+  border: 1px solid white;
+  flex-wrap: wrap;
+  display: flex;
+}
+
+.cell:hover {
+  background-color: rgb(107, 107, 107);
+}
