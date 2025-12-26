@@ -67,6 +67,7 @@ function changeColor(e) {
     target.dataset.percent = currentPercent;
 
     const baseR = 51;
+    const baseG = 51;
     const baseB = 51;
 
     const { r: targetR, g: targetG, b: targetB } = hexToRgb(currentColor);
