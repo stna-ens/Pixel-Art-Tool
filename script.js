@@ -37,17 +37,6 @@ document.body.addEventListener("touchend", () => {
   isDrawing = false;
 });
 
-container.addEventListener(
-  "touchmove",
-  (e) => {
-    if (isDrawing) {
-      e.preventDefault();
-      handleTouch(e);
-    }
-  },
-  { passive: false }
-);
-
 function createDefaultGrid() {
   for (let i = 0; i < 256; i++) {
     const cell = document.createElement("div");
@@ -58,15 +47,19 @@ function createDefaultGrid() {
 
 createGrid(16);
 
+function darkenCell(cell) {
+  let currentLight = Number(cell.dataset.light);
+  if (currentLight < 100) {
+    currentLight += 10;
+    cell.dataset.light = currentLight;
+    cell.style.backgroundColor = `hsl(0, 0%, ${currentLight}%)`;
+  }
+}
+
 function whitenCell(e) {
   const targetCell = e.target;
   if (e.type === "mouseover" && !isDrawing) return;
-  let currentLight = Number(targetCell.dataset.light);
-  if (currentLight < 100) {
-    currentLight += 10;
-    targetCell.dataset.light = currentLight;
-    targetCell.style.backgroundColor = `hsl(0, 0%, ${currentLight}%)`;
-  }
+  darkenCell(targetCell);
 }
 
 function createGrid(gridNumber) {
@@ -92,7 +85,7 @@ function handleTouch(e) {
   const touch = e.touches[0];
   const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
   if (targetElement && targetElement.classList.contains("cell")) {
-    whitenCell(e);
+    darkenCell(targetElement);
   }
 }
 
