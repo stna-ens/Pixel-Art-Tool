@@ -73,12 +73,24 @@ button:hover,
 }
 
 .tools {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   gap: 20px;
   align-items: center;
-  justify-content: center;
   margin-top: 20px;
   width: 100%;
+}
+
+.tools > :nth-child(1) {
+  justify-self: end;
+}
+
+.tools > :nth-child(2) {
+  justify-self: center;
+}
+
+.tools > :nth-child(3) {
+  justify-self: start;
 }
 
 #eraserBtn {
@@ -90,6 +102,17 @@ button:hover,
   background-color: white;
   color: black;
   border-color: white;
+}
+
+#resetBtn {
+  margin-top: -10px; /* Pull it a bit closer to the tools */
+  width: 150px; /* Wider button for emphasis */
+  border-color: #ff5555; /* Subtle red hint */
+}
+
+#resetBtn:hover {
+  background-color: #d32f2f;
+  border-color: #d32f2f;
 }
 
 #colorPicker {

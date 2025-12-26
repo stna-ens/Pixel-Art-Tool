@@ -148,3 +148,12 @@ btn.addEventListener("click", () => {
     createGrid(gridNumber);
   }
 });
+
+const resetBtn = document.getElementById("resetBtn");
+resetBtn.addEventListener("click", () => {
+  const cells = document.querySelectorAll(".cell");
+  cells.forEach((cell) => {
+    cell.style.backgroundColor = "hsl(0, 0%, 20%)";
+    cell.dataset.percent = 0;
+  });
+});
