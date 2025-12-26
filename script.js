@@ -13,6 +13,31 @@ container.classList.add("container");
 document.body.appendChild(container);
 
 container.addEventListener(
+  "touchstart",
+  (e) => {
+    isDrawing = true;
+    e.preventDefault();
+    handleTouch(e);
+  },
+  { passive: false }
+);
+
+container.addEventListener(
+  "touchmove",
+  (e) => {
+    if (isDrawing) {
+      e.preventDefault();
+      handleTouch(e);
+    }
+  },
+  { passive: false }
+);
+
+document.body.addEventListener("touchend", () => {
+  isDrawing = false;
+});
+
+container.addEventListener(
   "touchmove",
   (e) => {
     if (isDrawing) {
@@ -67,7 +92,7 @@ function handleTouch(e) {
   const touch = e.touches[0];
   const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
   if (targetElement && targetElement.classList.contains("cell")) {
-    whitenCell();
+    whitenCell(e);
   }
 }
 
