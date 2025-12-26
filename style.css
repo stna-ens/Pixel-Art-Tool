@@ -124,3 +124,15 @@ button:hover,
   justify-content: center;
   width: 100%;
 }
+
+@media (min-width: 800px) {
+  body {
+    gap: 40px; /* More breathing room on desktop */
+  }
+
+  .container {
+    width: 600px;
+    height: 600px;
+    border: 4px solid #444;
+  }
+}
