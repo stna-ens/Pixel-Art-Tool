@@ -3,6 +3,9 @@ body {
   background-color: rgb(48, 48, 48);
   height: 100%;
   width: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -11,22 +14,28 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  gap: 40px;
+  gap: 20px;
 }
 
 button,
 .changeGridNumber {
   background-color: rgb(81, 81, 81);
   color: white;
-  padding: 10px;
-  border-radius: 0px;
-  border: solid;
+  padding: 0 15px;
+  height: 50px;
+  border: 1px solid rgb(120, 120, 120);
   font-weight: bold;
+  font-size: 14px;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
 button:hover,
 .changeGridNumber:hover {
-  border-color: rgb(255, 255, 255);
-  background-color: rgb(70, 70, 70);
+  border-color: white;
+  background-color: rgb(90, 90, 90);
 }
 * {
   box-sizing: border-box;
@@ -38,14 +47,18 @@ button:hover,
   color: white;
   font-weight: bold;
   font-size: 35px;
+  text-align: center;
+  width: 100%;
 }
+
 .container {
   display: flex;
-  border: 1px solid white;
-  width: 90vmin;
-  height: 90vmin;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5); /* Pop off screen */
+  background-color: #222; /* Dark background for grid */
+  width: 95vmin;
+  height: 95vmin;
   flex-wrap: wrap;
-  margin-bottom: 20px;
+  margin: 0 auto 20px auto;
   touch-action: none;
 }
 
@@ -63,53 +76,51 @@ button:hover,
   display: flex;
   gap: 20px;
   align-items: center;
+  justify-content: center;
   margin-top: 20px;
+  width: 100%;
 }
 
 #eraserBtn {
   margin-top: 0;
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center; /* Center text */
-  border: 2px solid white; /* Match color swatch border */
-  padding: 0 20px; /* Adjust padding to rely on flex centering */
+  /* style inherited from generic button */
 }
 
 #eraserBtn.active {
   background-color: white;
   color: black;
-  border-color: white; /* Keep border white so layout doesn't shift, or match bg */
+  border-color: white;
 }
 
 #colorPicker {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  width: 100px;
+  width: 50px;
   height: 50px;
   background-color: transparent;
   border: none;
   cursor: pointer;
-  margin-top: 0;
-  padding: 0; /* Align padding */
+  margin: 0;
+  padding: 0;
 }
 
 #colorPicker::-webkit-color-swatch-wrapper {
-  padding: 0; /* Remove default padding */
+  padding: 0;
 }
 
 #colorPicker::-webkit-color-swatch {
-  border-radius: 0px;
-  border: 2px solid white;
+  /* Match buttons */
+  border: 1px solid rgb(120, 120, 120);
 }
 
 #colorPicker::-moz-color-swatch {
-  border-radius: 0px;
-  border: 2px solid white;
+  border: 1px solid rgb(120, 120, 120);
 }
 
 .footer {
   color: white;
   display: flex;
+  justify-content: center;
+  width: 100%;
 }
