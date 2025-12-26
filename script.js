@@ -1,4 +1,5 @@
 let isDrawing = false;
+
 document.body.addEventListener("mousedown", () => {
   isDrawing = true;
 });
