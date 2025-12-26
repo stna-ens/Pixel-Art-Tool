@@ -1,5 +1,4 @@
 let isDrawing = false;
-
 document.body.addEventListener("mousedown", () => {
   isDrawing = true;
 });
@@ -11,6 +10,17 @@ document.body.addEventListener("mouseup", () => {
 const container = document.createElement("div");
 container.classList.add("container");
 document.body.appendChild(container);
+
+container.addEventListener(
+  "touchmove",
+  (e) => {
+    if (isDrawing) {
+      e.preventDefault();
+      handleTouch(e);
+    }
+  },
+  { passive: false }
+);
 
 function createDefaultGrid() {
   for (let i = 0; i < 256; i++) {
@@ -49,6 +59,14 @@ function createGrid(gridNumber) {
       cell.addEventListener("mouseover", whitenCell);
       cell.addEventListener("mousedown", whitenCell);
     }
+  }
+}
+
+function handleTouch(e) {
+  const touch = e.touches[0];
+  const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (targetElement && targetElement.classList.contains("cell")) {
+    whitenCell();
   }
 }
 
