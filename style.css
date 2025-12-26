@@ -22,7 +22,6 @@ button,
   border-radius: 0px;
   border: solid;
   font-weight: bold;
-  margin-top: 20px;
 }
 button:hover,
 .changeGridNumber:hover {
@@ -35,6 +34,11 @@ button:hover,
   padding: 0;
 }
 
+.header {
+  color: white;
+  font-weight: bold;
+  font-size: 35px;
+}
 .container {
   display: flex;
   border: 1px solid white;
@@ -53,4 +57,26 @@ button:hover,
 
 .cell:hover {
   background-color: rgb(107, 107, 107);
+}
+
+#colorPicker {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100px;
+  height: 50px;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+#colorPicker::-webkit-color-swatch {
+  border-radius: 0px;
+  border: 2px solid white;
+}
+
+#colorPicker::-moz-color-swatch {
+  border-radius: 0px;
+  border: 2px solid white;
 }

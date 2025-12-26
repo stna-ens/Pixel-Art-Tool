@@ -1,4 +1,5 @@
 let isDrawing = false;
+let currentColor = "#ffffff";
 
 document.body.addEventListener("mousedown", () => {
   isDrawing = true;
@@ -10,7 +11,7 @@ document.body.addEventListener("mouseup", () => {
 
 const container = document.createElement("div");
 container.classList.add("container");
-document.body.appendChild(container);
+document.body.insertBefore(container, document.getElementById("colorPicker"));
 
 container.addEventListener(
   "touchstart",
@@ -47,19 +48,41 @@ function createDefaultGrid() {
 
 createGrid(16);
 
-function darkenCell(cell) {
-  let currentLight = Number(cell.dataset.light);
-  if (currentLight < 100) {
-    currentLight += 10;
-    cell.dataset.light = currentLight;
-    cell.style.backgroundColor = `hsl(0, 0%, ${currentLight}%)`;
-  }
+function hexToRgb(hex) {
+  const bigint = parseInt(hex.slice(1), 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return { r, g, b };
 }
 
-function whitenCell(e) {
-  const targetCell = e.target;
+function changeColor(e) {
   if (e.type === "mouseover" && !isDrawing) return;
-  darkenCell(targetCell);
+
+  const target = e.target;
+  let currentPercent = Number(target.dataset.percent || 0);
+
+  if (currentPercent < 100) {
+    currentPercent += 10;
+    target.dataset.percent = currentPercent;
+
+    const baseR = 51;
+    const baseB = 51;
+
+    const { r: targetR, g: targetG, b: targetB } = hexToRgb(currentColor);
+
+    const mixedR = Math.round(
+      baseR + (targetR - baseR) * (currentPercent / 100)
+    );
+    const mixedG = Math.round(
+      baseG + (targetG - baseG) * (currentPercent / 100)
+    );
+    const mixedB = Math.round(
+      baseB + (targetB - baseB) * (currentPercent / 100)
+    );
+
+    target.style.backgroundColor = `rgb(${mixedR}, ${mixedG}, ${mixedB})`;
+  }
 }
 
 function createGrid(gridNumber) {
@@ -73,10 +96,10 @@ function createGrid(gridNumber) {
       cell.style.width = `${cellSize}%`;
       cell.style.height = `${cellSize}%`;
       container.appendChild(cell);
-      cell.dataset.light = "20";
+      cell.dataset.percent = "0"; // Initialize percent state
       cell.style.backgroundColor = "hsl(0, 0%, 20%)";
-      cell.addEventListener("mouseover", whitenCell);
-      cell.addEventListener("mousedown", whitenCell);
+      cell.addEventListener("mouseover", changeColor);
+      cell.addEventListener("mousedown", changeColor);
     }
   }
 }
@@ -85,9 +108,16 @@ function handleTouch(e) {
   const touch = e.touches[0];
   const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
   if (targetElement && targetElement.classList.contains("cell")) {
-    darkenCell(targetElement);
+    const mockEvent = {
+      type: "mouseover",
+      target: targetElement,
+    };
+    changeColor(mockEvent);
   }
 }
+
+const colorPicker = document.getElementById("colorPicker");
+colorPicker.oninput = (e) => (currentColor = e.target.value);
 
 let btn = document.getElementById("changeGridNumber");
 btn.addEventListener("click", () => {
