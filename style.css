@@ -108,3 +108,8 @@ button:hover,
   border-radius: 0px;
   border: 2px solid white;
 }
+
+.footer {
+  color: white;
+  display: flex;
+}
