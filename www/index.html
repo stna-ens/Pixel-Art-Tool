@@ -2,23 +2,98 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>Etch-a-Sketch</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <div class="content-wrapper">
-      <div class="header">PixelArt Maker</div>
-      <div class="tools" id="tools">
-        <button id="changeGridNumber">Cell Count</button>
-        <input type="color" id="colorPicker" value="white" />
-        <button id="eraserBtn">Eraser</button>
+      <div class="header">
+        <button id="undoBtn" class="icon-btn" title="Undo">
+          <svg viewBox="0 0 24 24" width="24" height="24">
+            <path
+              fill="currentColor"
+              d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"
+            />
+          </svg>
+        </button>
+        <span class="title-text">PixelArt Maker</span>
       </div>
-      <button id="resetBtn">Reset</button>
+      <div class="game-area">
+        <div class="tools" id="tools">
+          <button id="themeBtn">Theme</button>
+          <button id="eraserBtn">Eraser</button>
+          <button id="changeGridNumber">Cell Count</button>
+          <button id="resetBtn">Reset</button>
+          <input type="color" id="colorPicker" value="#ffffff" />
+        </div>
+      </div>
       <div class="footer">
         <p>Made By Enes Kış</p>
       </div>
     </div>
+
+    <!-- Theme Modal -->
+    <div id="themeModal" class="theme-modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Select Theme</h2>
+        <div class="theme-presets">
+          <!-- Filled by JS -->
+        </div>
+
+        <hr />
+
+        <h3>Create Custom Theme</h3>
+        <div class="custom-theme-inputs">
+          <input
+            type="text"
+            id="customThemeName"
+            placeholder="Theme Name"
+            style="
+              width: 100%;
+              padding: 8px;
+              margin-bottom: 10px;
+              border-radius: 0;
+              border: 1px solid #000;
+            "
+          />
+
+          <label
+            >Background: <input type="color" id="customBgMain" value="#303030"
+          /></label>
+          <label
+            >Container:
+            <input type="color" id="customBgContainer" value="#222222"
+          /></label>
+          <label
+            >Grid Color: <input type="color" id="customBgCell" value="#333333"
+          /></label>
+          <label
+            >Buttons: <input type="color" id="customBtnBg" value="#515151"
+          /></label>
+          <label
+            >Text: <input type="color" id="customText" value="#ffffff"
+          /></label>
+        </div>
+        <div class="modal-buttons">
+          <button id="applyPreviewBtn" class="secondary-btn">
+            Apply Preview
+          </button>
+          <button id="saveCustomThemeBtn">Save Custom Theme</button>
+        </div>
+      </div>
+    </div>
+
     <script src="script.js"></script>
   </body>
 </html>
