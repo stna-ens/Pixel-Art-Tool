@@ -2,10 +2,8 @@
   "name": "pixy-mobile",
   "version": "1.0.0",
   "description": "Pixel Art Tool Mobile App",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo 'No build step'",
     "ios": "cap open ios",
     "android": "cap open android"
   },
