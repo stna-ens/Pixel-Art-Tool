@@ -127,8 +127,12 @@ button:active,
   left: 50%;
   transform: translateX(-50%);
   text-align: center;
-  text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.5); /* Retro shadow */
+  /* Make it "Bold" by stroking it with the same color */
+  -webkit-text-stroke: 1px var(--text-main);
+  /* Sharper, harder shadow for more retro vibe */
+  text-shadow: 4px 4px 0px rgba(0, 0, 0, 0.2);
   white-space: nowrap;
+  letter-spacing: 4px; /* More spacing for the bold look */
 }
 
 #undoBtn {
