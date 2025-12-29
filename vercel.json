@@ -1,15 +1,12 @@
 {
-  "version": 2,
-  "builds": [
+  "devCommand": "echo 'No dev command'",
+  "buildCommand": "echo 'No build command'",
+  "outputDirectory": "www",
+  "framework": null,
+  "rewrites": [
     {
-      "src": "www/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/www/$1"
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
