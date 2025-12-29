@@ -39,6 +39,12 @@ document.addEventListener("pointerup", (e) => {
   }
 });
 
+// Prevent double-click zoom on entire page
+document.addEventListener("dblclick", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+});
+
 // Main initialization
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
