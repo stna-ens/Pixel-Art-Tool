@@ -290,7 +290,7 @@ button:active,
 
   /* Add space below header for the absolutely positioned Saved Folder button */
   .header {
-    margin-bottom: 60px;
+    margin-bottom: 90px;
   }
 }
 
