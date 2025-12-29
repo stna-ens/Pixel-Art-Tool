@@ -296,6 +296,11 @@ button:active,
     left: 20px;
     z-index: 1000;
   }
+
+  /* Ensure Grid doesn't hit the Header */
+  .header {
+    margin-bottom: 30px;
+  }
 }
 
 /* Landscape: Hide Folder Button, Show Sidebar */
@@ -318,8 +323,8 @@ button:active,
   background-color: var(--bg-container); /* Light background for grid area */
 
   /* Responsive sizing - FITS AVAILABLE SPACE WITHOUT OVERFLOW */
-  width: 85vmin; /* Use vmin to never exceed viewport */
-  height: 85vmin;
+  width: 82vmin; /* Use vmin to never exceed viewport */
+  height: 82vmin;
 
   flex-wrap: wrap;
   margin: 0 auto 10px auto;
