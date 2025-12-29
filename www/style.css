@@ -287,6 +287,11 @@ button:active,
   .saved-sidebar {
     display: none !important;
   }
+
+  /* Add space below header for the absolutely positioned Saved Folder button */
+  .header {
+    margin-bottom: 60px;
+  }
 }
 
 /* Landscape: Hide Folder Button, Show Sidebar */
