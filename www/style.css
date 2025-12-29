@@ -21,14 +21,11 @@ body {
   color: var(--text-main);
   height: 100%;
   width: 100%;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-touch-callout: none; /* Disable iOS Callouts/Magnifier */
   -webkit-tap-highlight-color: transparent;
   font-family: "VT323", monospace; /* Retro Font */
   font-size: 20px; /* Slightly larger for retro readability */
   overflow: hidden; /* Prevent scrolling on main body */
-  touch-action: none; /* Disable all default touch actions (scroll/zoom) */
+  /* Removed touch-action: none and other iOS restrictions */
 }
 
 body {
