@@ -1,5 +1,7 @@
+```json
 {
-  "appId": "com.pixelart.mobile",
-  "appName": "Pixel Art Mobile",
+  "appId": "pixy-mobile",
+  "appName": "Pixy",
   "webDir": "www"
 }
+```
