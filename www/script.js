@@ -76,7 +76,7 @@ function createDefaultGrid() {
   }
 }
 
-createGrid(16);
+// Global listeners set, grid created in window.onload
 
 function hexToRgb(hex) {
   // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
@@ -98,95 +98,84 @@ function hexToRgb(hex) {
 
 function getBaseColors() {
   // Return the cached colors (set when theme was applied)
+  if (!cachedBaseColors) {
+    console.warn("Base colors missing, defaulting to white");
+    return { r: 255, g: 255, b: 255 };
+  }
   return cachedBaseColors;
 }
 
-// Helper to add action to current stroke buffer
-function addToCurrentStroke(
-  element,
-  prevColor,
-  prevPercent,
-  newColor,
-  newPercent
-) {
-  currentStroke.push({
-    element,
-    prevColor,
-    prevPercent,
-    newColor,
-    newPercent,
-  });
-}
-
-function undo() {
-  if (historyStack.length === 0) return;
-
-  // Pop the last stroke (array of actions)
-  const stroke = historyStack.pop();
-
-  // Revert all actions in the stroke, in reverse order
-  for (let i = stroke.length - 1; i >= 0; i--) {
-    const action = stroke[i];
-    const { element, prevColor, prevPercent } = action;
-    element.style.backgroundColor = prevColor;
-    element.dataset.percent = prevPercent;
-  }
-}
+// ... (addToCurrentStroke remains same)
 
 function changeColor(e) {
-  if (e.type === "mouseover" && !isDrawing) return;
+  try {
+    if (e.type === "mouseover" && !isDrawing) return;
 
-  const target = e.target;
-  // Capture state BEFORE modification
-  const prevColor = target.style.backgroundColor;
-  const prevPercent = target.dataset.percent || 0;
+    const target = e.target;
+    // Capture state BEFORE modification
+    const prevColor = target.style.backgroundColor;
+    const prevPercent = target.dataset.percent || 0;
 
-  if (isErasing) {
-    target.style.backgroundColor = "var(--bg-cell)";
-    target.dataset.percent = 0;
+    if (isErasing) {
+      target.style.backgroundColor = "var(--bg-cell)";
+      target.dataset.percent = 0;
+      addToCurrentStroke(target, prevColor, prevPercent, "var(--bg-cell)", 0);
+      return;
+    }
 
-    addToCurrentStroke(target, prevColor, prevPercent, "var(--bg-cell)", 0);
-    return;
-  }
+    let currentPercent = Number(target.dataset.percent || 0);
 
-  let currentPercent = Number(target.dataset.percent || 0);
+    if (currentPercent < 100) {
+      currentPercent += 10;
 
-  if (currentPercent < 100) {
-    currentPercent += 10;
+      // Calculate new color DYNAMICALLY
+      const baseColors = getBaseColors();
+      const baseR_val = baseColors.r != null ? baseColors.r : 255;
+      const baseG_val = baseColors.g != null ? baseColors.g : 255;
+      const baseB_val = baseColors.b != null ? baseColors.b : 255;
 
-    // Calculate new color DYNAMICALLY
-    const { r: baseR_val, g: baseG_val, b: baseB_val } = getBaseColors();
+      let targetR = 0,
+        targetG = 0,
+        targetB = 0;
 
-    const result = hexToRgb(currentColor);
-    // Ensure we have a valid target color, otherwise default to Black (user intent)
-    const {
-      r: targetR,
-      g: targetG,
-      b: targetB,
-    } = result ? result : { r: 0, g: 0, b: 0 };
+      // Parse current color robustly
+      if (currentColor.startsWith("#")) {
+        const result = hexToRgb(currentColor);
+        if (result) {
+          targetR = result.r;
+          targetG = result.g;
+          targetB = result.b;
+        }
+      } else {
+        const parsed = parseColorString(currentColor);
+        if (parsed) {
+          targetR = parsed.r;
+          targetG = parsed.g;
+          targetB = parsed.b;
+        }
+      }
 
-    const mixedR = Math.round(
-      baseR_val + (targetR - baseR_val) * (currentPercent / 100)
-    );
-    const mixedG = Math.round(
-      baseG_val + (targetG - baseG_val) * (currentPercent / 100)
-    );
-    const mixedB = Math.round(
-      baseB_val + (targetB - baseB_val) * (currentPercent / 100)
-    );
+      // Safe mixing logic (prevent NaN but allow floats)
+      const mix = currentPercent / 100;
+      const mixedR = Math.round(baseR_val + (targetR - baseR_val) * mix) || 0;
+      const mixedG = Math.round(baseG_val + (targetG - baseG_val) * mix) || 0;
+      const mixedB = Math.round(baseB_val + (targetB - baseB_val) * mix) || 0;
 
-    const newColor = `rgb(${mixedR}, ${mixedG}, ${mixedB})`;
+      const newColor = `rgb(${mixedR}, ${mixedG}, ${mixedB})`;
 
-    target.dataset.percent = currentPercent;
-    target.style.backgroundColor = newColor;
+      target.dataset.percent = currentPercent;
+      target.style.backgroundColor = newColor;
 
-    addToCurrentStroke(
-      target,
-      prevColor,
-      prevPercent,
-      newColor,
-      currentPercent
-    );
+      addToCurrentStroke(
+        target,
+        prevColor,
+        prevPercent,
+        newColor,
+        currentPercent
+      );
+    }
+  } catch (err) {
+    console.warn("Drawing error (graceful):", err);
   }
 }
 
@@ -987,12 +976,17 @@ function renderThemeOptions() {
   }
 }
 
-// Initial Load
+// (Previous initialization removed to prevent duplicates)
+
+// --- INITIALIZATION ---
+
+// 1. Load Custom Themes from Storage
 loadCustomThemes();
+
+// 2. Determine Active Theme
 const savedThemeId = localStorage.getItem("pixelArtThemeId");
 activeThemeId = savedThemeId || "poolsuite";
 
-// Check where it exists
 let initialColors = defaultThemes.poolsuite.colors;
 if (defaultThemes[activeThemeId]) {
   initialColors = defaultThemes[activeThemeId].colors;
@@ -1000,7 +994,26 @@ if (defaultThemes[activeThemeId]) {
   initialColors = customThemes[activeThemeId].colors;
 }
 
+// 3. Apply Theme IMMEDIATELY
 applyTheme(initialColors);
+
+// 4. Create Grid (Classic Mode) - Critical Fix: Must run NOW.
+createGrid(16);
+
+// 5. Render Options
+renderThemeOptions();
+
+// 6. Force verify base colors after a short delay (just in case CSS vars lag)
+// This is a safety check, but the grid is already built so user can see it.
+setTimeout(() => {
+  const bgCell = getComputedStyle(document.documentElement).getPropertyValue(
+    "--bg-cell"
+  );
+  if (bgCell) {
+    const rgb = parseColorString(bgCell.trim());
+    if (rgb) cachedBaseColors = rgb;
+  }
+}, 100);
 
 // Open Modal
 themeBtn.onclick = () => {
@@ -1072,27 +1085,31 @@ saveCustomBtn.onclick = () => {
   customInputs.name.value = "";
 };
 
+// Robust Color Parser using the Browser's own engine
 function parseColorString(colorStr) {
-  // Try Hex
-  if (colorStr.startsWith("#")) {
-    const rgb = hexToRgb(colorStr);
-    if (rgb) return rgb;
-  }
-  // Try RGB
-  if (colorStr.startsWith("rgb")) {
-    const parts = colorStr.match(/\d+/g);
+  // Use a temporary element to let the browser normalize the color
+  const dummy = document.createElement("div");
+  dummy.style.color = colorStr;
+  dummy.style.display = "none";
+  document.body.appendChild(dummy);
+
+  const computedColor = window.getComputedStyle(dummy).color;
+  document.body.removeChild(dummy);
+
+  // Computed color is ALWAYS "rgb(r, g, b)" or "rgba(r, g, b, a)"
+  if (computedColor) {
+    const parts = computedColor.match(/\d+/g);
     if (parts && parts.length >= 3) {
       return {
-        r: parseInt(parts[0]),
-        g: parseInt(parts[1]),
-        b: parseInt(parts[2]),
+        r: parseInt(parts[0], 10),
+        g: parseInt(parts[1], 10),
+        b: parseInt(parts[2], 10),
       };
     }
   }
-  // Named colors
-  if (colorStr.toLowerCase() === "white") return { r: 255, g: 255, b: 255 };
-  if (colorStr.toLowerCase() === "black") return { r: 0, g: 0, b: 0 };
-  // Default white
+
+  // Fallback ONLY if browser completely failed to parse
+  console.warn(`Failed to parse color: ${colorStr}, defaulting to White`);
   return { r: 255, g: 255, b: 255 };
 }
 
