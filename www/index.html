@@ -4,9 +4,10 @@
     <meta charset="UTF-8" />
     <meta
       name="viewport"
-      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
     <title>Pixy</title>
+    <link rel="icon" type="image/png" href="icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,27 +20,125 @@
     <div class="content-wrapper">
       <div class="header">
         <button id="undoBtn" class="icon-btn" title="Undo">
-          <svg viewBox="0 0 24 24" width="24" height="24">
-            <path
-              fill="currentColor"
-              d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z"
-            />
+          <svg
+            viewBox="0 0 12 12"
+            width="24"
+            height="24"
+            shape-rendering="crispEdges"
+          >
+            <!-- Pixelated Curved Undo Arrow -->
+            <!-- Arrow head (left pointing) -->
+            <rect fill="currentColor" x="0" y="3" width="1" height="1" />
+            <rect fill="currentColor" x="1" y="2" width="1" height="1" />
+            <rect fill="currentColor" x="1" y="4" width="1" height="1" />
+            <rect fill="currentColor" x="2" y="1" width="1" height="1" />
+            <rect fill="currentColor" x="2" y="5" width="1" height="1" />
+            <!-- Horizontal bar -->
+            <rect fill="currentColor" x="2" y="3" width="1" height="1" />
+            <rect fill="currentColor" x="3" y="3" width="1" height="1" />
+            <rect fill="currentColor" x="4" y="3" width="1" height="1" />
+            <rect fill="currentColor" x="5" y="3" width="1" height="1" />
+            <rect fill="currentColor" x="6" y="3" width="1" height="1" />
+            <rect fill="currentColor" x="7" y="3" width="1" height="1" />
+            <rect fill="currentColor" x="8" y="3" width="1" height="1" />
+            <!-- Curve down -->
+            <rect fill="currentColor" x="9" y="4" width="1" height="1" />
+            <rect fill="currentColor" x="9" y="5" width="1" height="1" />
+            <rect fill="currentColor" x="9" y="6" width="1" height="1" />
+            <rect fill="currentColor" x="9" y="7" width="1" height="1" />
+            <!-- Bottom curve -->
+            <rect fill="currentColor" x="8" y="8" width="1" height="1" />
+            <rect fill="currentColor" x="7" y="9" width="1" height="1" />
+            <rect fill="currentColor" x="6" y="9" width="1" height="1" />
+            <rect fill="currentColor" x="5" y="9" width="1" height="1" />
           </svg>
         </button>
         <span class="title-text">Pixy</span>
+        <button id="saveDraftBtn" class="header-btn">Save</button>
+        <button
+          id="openSavedBtn"
+          class="header-btn-icon"
+          title="Saved Projects"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            shape-rendering="crispEdges"
+          >
+            <path
+              fill="currentColor"
+              d="M2,6 L2,18 L22,18 L22,8 L12,8 L10,6 Z"
+            />
+            <path
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              d="M2,6 L2,18 L22,18 L22,8 L12,8 L10,6 Z"
+            />
+          </svg>
+        </button>
       </div>
       <div class="game-area">
-        <div class="tools" id="tools">
-          <button id="themeBtn">Theme</button>
-          <button id="eraserBtn">Eraser</button>
-          <button id="changeGridNumber">Cell Count</button>
-          <button id="resetBtn">Reset</button>
-          <input type="color" id="colorPicker" value="#ffffff" />
+        <div id="drawingBoard" class="drawing-board">
+          <div class="tools" id="tools">
+            <button id="themeBtn">Theme</button>
+            <button id="eraserBtn">Eraser</button>
+            <button id="changeGridNumber">Cell Count</button>
+            <button id="resetBtn">Reset</button>
+            <input type="color" id="colorPicker" value="#ffffff" />
+          </div>
+        </div>
+        <!-- Saved Section -->
+        <div id="savedSidebar" class="saved-sidebar">
+          <h3>Saved</h3>
+          <div id="savedList" class="saved-list">
+            <!-- Saved items will go here -->
+          </div>
         </div>
       </div>
       <div class="footer">
         <p>Made By Enes Kış</p>
       </div>
+    </div>
+
+    <!-- GLOBAL SAVED PROJECTS MODAL (Mobile) -->
+    <div id="savedProjectsModal" class="saved-modal">
+      <div class="saved-modal-header">
+        <span>SAVED PROJECTS</span>
+        <button class="close-saved-btn" onclick="toggleSavedModal()">X</button>
+      </div>
+      <div id="mobileSavedList" class="saved-list-grid">
+        <!-- JS will populate this -->
+      </div>
+    </div>
+
+    <!-- GLOBAL CELL COUNT MODAL -->
+    <div id="cellCountPanel" class="cell-count-modal hidden">
+      <div class="modal-header">CELL COUNT</div>
+      <div class="cell-panel-content">
+        <input
+          type="range"
+          id="cellSlider"
+          min="1"
+          max="100"
+          value="16"
+          class="modal-slider"
+        />
+        <div class="input-row">
+          <input
+            type="number"
+            id="cellNumberInput"
+            min="1"
+            max="100"
+            value="16"
+          />
+          <button id="applyCellCount">APPLY</button>
+        </div>
+      </div>
+      <button class="close-modal-btn" onclick="toggleCellCountPanel()">
+        CANCEL
+      </button>
     </div>
 
     <!-- Theme Modal -->
@@ -92,6 +191,34 @@
           <button id="saveCustomThemeBtn">Save Custom Theme</button>
         </div>
       </div>
+    </div>
+
+    <!-- Export Container -->
+    <div class="export-container">
+      <div id="exportMenu" class="export-menu hidden">
+        <button id="exportStickerBtn">Export Sticker</button>
+        <button id="exportPngBtn">Export PNG</button>
+      </div>
+      <button id="exportMainBtn" class="floating-btn" title="Export">
+        <svg
+          viewBox="0 0 24 24"
+          width="32"
+          height="32"
+          shape-rendering="crispEdges"
+        >
+          <!-- Pixelated Download Icon -->
+          <rect fill="currentColor" x="11" y="2" width="2" height="10" />
+          <rect fill="currentColor" x="9" y="10" width="2" height="2" />
+          <rect fill="currentColor" x="13" y="10" width="2" height="2" />
+          <rect fill="currentColor" x="7" y="12" width="2" height="2" />
+          <rect fill="currentColor" x="15" y="12" width="2" height="2" />
+          <rect fill="currentColor" x="5" y="14" width="2" height="2" />
+          <rect fill="currentColor" x="17" y="14" width="2" height="2" />
+          <rect fill="currentColor" x="7" y="16" width="10" height="2" />
+          <rect fill="currentColor" x="3" y="18" width="18" height="2" />
+          <rect fill="currentColor" x="3" y="20" width="18" height="2" />
+        </svg>
+      </button>
     </div>
 
     <script src="script.js"></script>

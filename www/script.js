@@ -24,14 +24,12 @@ function updateCachedColor() {
   }
 }
 
-document.body.addEventListener("mousedown", () => {
-  isDrawing = true;
-  currentStroke = []; // Start new stroke
-});
-
-document.body.addEventListener("mouseup", () => {
+// --- POINTER EVENTS ARCHITECTURE ---
+// Global release handler to ensure we stop drawing if cursor leaves page
+document.addEventListener("pointerup", (e) => {
   isDrawing = false;
-  lastTouchedElement = null; // Reset on mouse up
+  lastTouchedElement = null;
+  // If there's an active stroke, push it to history
   if (currentStroke.length > 0) {
     historyStack.push(currentStroke);
     if (historyStack.length > MAX_HISTORY) {
@@ -46,32 +44,33 @@ container.classList.add("container");
 const tools = document.getElementById("tools");
 tools.parentNode.insertBefore(container, tools);
 
-container.addEventListener(
-  "touchstart",
-  (e) => {
-    isDrawing = true;
-    lastTouchedElement = null; // Reset on new touch
-    currentStroke = []; // Start new stroke
+// 1. Pointer Down (Start Drawing)
+container.addEventListener("pointerdown", (e) => {
+  // Only left click or touch
+  if (e.button !== 0 && e.pointerType === "mouse") return;
+
+  e.preventDefault(); // Prevent scroll/drag
+  isDrawing = true;
+  currentStroke = [];
+  container.setPointerCapture(e.pointerId); // CRITICAL: Captures all moves even if they leave elements
+
+  handlePointerDraw(e);
+});
+
+// 2. Pointer Move (Draw Stroke)
+container.addEventListener("pointermove", (e) => {
+  if (isDrawing) {
     e.preventDefault();
-    handleTouch(e);
-  },
-  { passive: false }
-);
+    handlePointerDraw(e);
+  }
+});
 
-container.addEventListener(
-  "touchmove",
-  (e) => {
-    if (isDrawing) {
-      e.preventDefault();
-      handleTouch(e);
-    }
-  },
-  { passive: false }
-);
-
-document.body.addEventListener("touchend", () => {
+// 3. Pointer Up (Stop Drawing)
+container.addEventListener("pointerup", (e) => {
   isDrawing = false;
   lastTouchedElement = null;
+  container.releasePointerCapture(e.pointerId);
+
   if (currentStroke.length > 0) {
     historyStack.push(currentStroke);
     if (historyStack.length > MAX_HISTORY) {
@@ -80,6 +79,20 @@ document.body.addEventListener("touchend", () => {
     currentStroke = [];
   }
 });
+
+// Unified Handler
+function handlePointerDraw(e) {
+  // elementFromPoint works for both mouse and touch
+  const target = document.elementFromPoint(e.clientX, e.clientY);
+
+  if (target && target.classList.contains("cell")) {
+    // Avoid repainting the same cell endlessly in one move event
+    if (target !== lastTouchedElement) {
+      lastTouchedElement = target;
+      changeColor(target); // Pass element DIRECTLY
+    }
+  }
+}
 
 function createDefaultGrid() {
   for (let i = 0; i < 256; i++) {
@@ -118,21 +131,38 @@ function getBaseColors() {
   return cachedBaseColors;
 }
 
-// ... (addToCurrentStroke remains same)
+// Undo support: Records cell state before modification
+function addToCurrentStroke(
+  cell,
+  prevColor,
+  prevPercent,
+  newColor,
+  newPercent
+) {
+  currentStroke.push({
+    element: cell,
+    prevColor: prevColor,
+    prevPercent: prevPercent,
+    newColor: newColor,
+    newPercent: newPercent,
+  });
+}
 
-function changeColor(e) {
+function undo() {
+  if (historyStack.length === 0) return;
+  const lastStroke = historyStack.pop();
+  // Revert each cell in the stroke
+  lastStroke.forEach((item) => {
+    item.element.style.backgroundColor = item.prevColor || "var(--bg-cell)";
+    item.element.dataset.percent = item.prevPercent || 0;
+  });
+}
+
+// 5. Change Color (Pure Logic) - calling with 'target' element
+function changeColor(target) {
   try {
-    // FORCE DRAW if this is an explicit start event, even if isDrawing is false
-    // This fixes "ignored" taps
-    const isStartEvent = e.type === "mousedown" || e.type === "touchstart";
-
-    if (isStartEvent) {
-      isDrawing = true;
-    }
-
-    if (e.type === "mouseover" && !isDrawing) return;
-
-    const target = e.target;
+    // No event parsing - logic is upstream
+    // const target = target; // (passed in)
     // Capture state BEFORE modification
     const prevColor = target.style.backgroundColor;
     const prevPercent = target.dataset.percent || 0;
@@ -202,46 +232,17 @@ function createGrid(gridNumber) {
       container.appendChild(cell);
       cell.dataset.percent = "0"; // Initialize percent state
       cell.style.backgroundColor = "var(--bg-cell)";
-      cell.addEventListener("mouseover", changeColor);
-      cell.addEventListener("mousedown", changeColor);
+      // DIRECT LISTENERS FOR RELIABLE DRAWING
+      cell.addEventListener("pointerdown", (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        currentStroke = [];
+        changeColor(cell);
+      });
+      cell.addEventListener("pointerenter", () => {
+        if (isDrawing) changeColor(cell);
+      });
     }
-  }
-}
-
-function handleTouch(e) {
-  // Check for stylus input first
-  let activeTouch = Array.from(e.touches).find((t) => t.touchType === "stylus");
-
-  if (activeTouch) {
-    lastStylusTime = Date.now(); // Update timestamp
-  } else {
-    // Palm Rejection: If stylus was used recently (e.g., last 2 seconds), ignore finger
-    if (Date.now() - lastStylusTime < 1000) {
-      return;
-    }
-    activeTouch = e.touches[0]; // Fallback to finger
-  }
-
-  if (!activeTouch) return;
-
-  const targetElement = document.elementFromPoint(
-    activeTouch.clientX,
-    activeTouch.clientY
-  );
-
-  // If we are still on the same element as the last frame, don't re-trigger
-  // This mimics mouseover behavior where it only fires once per entry
-  if (targetElement === lastTouchedElement) {
-    return;
-  }
-
-  if (targetElement && targetElement.classList.contains("cell")) {
-    lastTouchedElement = targetElement; // Update last touched
-    const mockEvent = {
-      type: "mouseover",
-      target: targetElement,
-    };
-    changeColor(mockEvent);
   }
 }
 
@@ -276,24 +277,108 @@ undoBtn.onclick = () => {
   undo();
 };
 
-let btn = document.getElementById("changeGridNumber");
-btn.addEventListener("click", () => {
-  let gridNumber = prompt("Enter a number between 1 and 100");
-  if (gridNumber < 1 || gridNumber > 100) {
-    alert("Please enter a number between 1 and 100");
-  } else {
-    createGrid(gridNumber);
-  }
+const changeGridNumberBtn = document.getElementById("changeGridNumber");
+const cellCountPanel = document.getElementById("cellCountPanel");
+const cellSlider = document.getElementById("cellSlider");
+const cellNumberInput = document.getElementById("cellNumberInput");
+const applyCellCountBtn = document.getElementById("applyCellCount");
+
+function toggleCellCountPanel() {
+  cellCountPanel.classList.toggle("hidden");
+  // Toggle body class for Landscape Layout shifts ("Push" effect)
+  document.body.classList.toggle("cell-panel-open");
+}
+
+if (changeGridNumberBtn) {
+  changeGridNumberBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    toggleCellCountPanel();
+  });
+}
+
+// Ensure panel doesn't close when clicking inside it
+cellCountPanel.addEventListener("click", (e) => {
+  e.stopPropagation();
 });
+
+// Close when clicking outside (Optional, but user didn't ask. Stick to explicit buttons for now)
+
+// Sync slider and input (no real-time grid changes for performance)
+cellSlider.oninput = () => {
+  cellNumberInput.value = cellSlider.value;
+};
+
+cellNumberInput.oninput = () => {
+  let val = parseInt(cellNumberInput.value) || 1;
+  if (val < 1) val = 1;
+  if (val > 100) val = 100;
+  cellSlider.value = val;
+};
+
+// Apply button creates the grid
+applyCellCountBtn.onclick = () => {
+  let gridNumber = parseInt(cellNumberInput.value) || 16;
+  if (gridNumber < 1) gridNumber = 1;
+  if (gridNumber > 100) gridNumber = 100;
+  createGrid(gridNumber);
+  toggleCellCountPanel();
+};
+
+const savedProjectsModal = document.getElementById("savedProjectsModal");
+const openSavedBtn = document.getElementById("openSavedBtn");
+const mobileSavedList = document.getElementById("mobileSavedList");
+
+function toggleSavedModal() {
+  savedProjectsModal.classList.toggle("active");
+  if (savedProjectsModal.classList.contains("active")) {
+    renderSavedDrawings(); // Refresh when opening
+  }
+}
+
+if (openSavedBtn) {
+  const handleOpen = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleSavedModal();
+  };
+
+  openSavedBtn.addEventListener("click", handleOpen);
+  openSavedBtn.addEventListener("touchend", handleOpen);
+}
 
 const resetBtn = document.getElementById("resetBtn");
 resetBtn.addEventListener("click", () => {
   const cells = document.querySelectorAll(".cell");
+
+  // Save current state as a single "stroke" so reset can be undone
+  const resetStroke = [];
+  cells.forEach((cell) => {
+    // Only save cells that were actually painted
+    if (cell.dataset.percent && cell.dataset.percent !== "0") {
+      resetStroke.push({
+        element: cell,
+        prevColor: cell.style.backgroundColor,
+        prevPercent: cell.dataset.percent,
+        newColor: "var(--bg-cell)",
+        newPercent: 0,
+      });
+    }
+  });
+
+  // Only push if there was something to reset
+  if (resetStroke.length > 0) {
+    historyStack.push(resetStroke);
+    // Keep only last 10 resets/strokes
+    if (historyStack.length > MAX_HISTORY) {
+      historyStack.shift();
+    }
+  }
+
+  // Now clear the canvas
   cells.forEach((cell) => {
     cell.style.backgroundColor = "var(--bg-cell)";
     cell.dataset.percent = 0;
   });
-  historyStack = [];
 });
 
 /* Theme Logic */
@@ -1149,3 +1234,454 @@ function applyTheme(themeObj) {
 container.addEventListener("mousedown", (e) => {
   e.preventDefault();
 });
+
+/* Export Logic */
+const exportMainBtn = document.getElementById("exportMainBtn");
+const exportMenu = document.getElementById("exportMenu");
+const exportStickerBtn = document.getElementById("exportStickerBtn");
+const exportPngBtn = document.getElementById("exportPngBtn");
+
+exportMainBtn.addEventListener("click", (e) => {
+  e.stopPropagation(); // Prevent immediate closing
+  exportMenu.classList.toggle("hidden");
+});
+
+document.addEventListener("click", (e) => {
+  if (
+    !exportMenu.classList.contains("hidden") &&
+    !exportMenu.contains(e.target) &&
+    e.target !== exportMainBtn
+  ) {
+    exportMenu.classList.add("hidden");
+  }
+});
+
+exportStickerBtn.addEventListener("click", () => {
+  // Save sticker directly to Photos for reliable "Add to Stickers" workflow
+  exportStickerToPhotos();
+  exportMenu.classList.add("hidden");
+});
+
+exportPngBtn.addEventListener("click", () => {
+  exportCanvas(false, false); // false for transparent, false for clipboard (use Share)
+  exportMenu.classList.add("hidden");
+});
+
+async function exportStickerToPhotos() {
+  const canvas = document.createElement("canvas");
+  const size = 1048;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  // Get current grid size
+  const cells = document.querySelectorAll(".cell");
+  const gridCount = Math.sqrt(cells.length);
+  const cellSize = size / gridCount;
+
+  // Transparent background - no fill
+
+  // Draw Cells
+  cells.forEach((cell, index) => {
+    const row = Math.floor(index / gridCount);
+    const col = index % gridCount;
+    const percent = parseFloat(cell.dataset.percent || 0);
+    const backgroundColor = getComputedStyle(cell).backgroundColor;
+
+    if (percent > 0) {
+      ctx.fillStyle = backgroundColor;
+      ctx.fillRect(col * cellSize, row * cellSize, cellSize + 1, cellSize + 1);
+    }
+  });
+
+  const dataURL = canvas.toDataURL("image/png");
+
+  // Use Capacitor Media plugin to save to Photos
+  if (
+    window.Capacitor &&
+    window.Capacitor.Plugins &&
+    window.Capacitor.Plugins.Media
+  ) {
+    try {
+      await window.Capacitor.Plugins.Media.savePhoto({
+        path: dataURL, // The plugin accepts data URLs
+        albumIdentifier: undefined, // Saves to Camera Roll
+      });
+      alert("Saved to Gallery");
+    } catch (e) {
+      console.error("Save to Photos failed", e);
+      alert("Could not save to Photos. Error: " + e.message);
+    }
+  } else {
+    // Fallback for web: Download the file
+    const link = document.createElement("a");
+    link.download = "pixy-sticker.png";
+    link.href = dataURL;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    alert(
+      "Sticker downloaded! On mobile, use the native app for direct Photos saving."
+    );
+  }
+}
+
+function exportCanvas(isTransparent, isClipboard) {
+  const canvas = document.createElement("canvas");
+  const size = 1048; // Moderate resolution for clipboard
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+
+  // Get current grid size
+  const cells = document.querySelectorAll(".cell");
+  const gridCount = Math.sqrt(cells.length);
+  const cellSize = size / gridCount;
+
+  // 1. Fill Background (if not transparent)
+  if (!isTransparent) {
+    // Get current grid background color
+    const containerStyle = getComputedStyle(
+      document.querySelector(".container")
+    );
+    ctx.fillStyle = containerStyle.backgroundColor;
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  // 2. Draw Cells
+  cells.forEach((cell, index) => {
+    const row = Math.floor(index / gridCount);
+    const col = index % gridCount;
+
+    const percent = parseFloat(cell.dataset.percent || 0);
+    const backgroundColor = getComputedStyle(cell).backgroundColor;
+
+    if (percent > 0) {
+      ctx.fillStyle = backgroundColor;
+      // Draw with slight overlap to prevent gaps
+      ctx.fillRect(col * cellSize, row * cellSize, cellSize + 1, cellSize + 1);
+    }
+  });
+
+  if (isClipboard) {
+    const dataURL = canvas.toDataURL("image/png");
+    copyToClipboard(dataURL);
+  } else {
+    // 3. Convert to Blob to share
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const filename = `pixy-export-${
+      isTransparent ? "sticker" : "image"
+    }-${timestamp}.png`;
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return;
+      shareFile(blob, filename);
+    }, "image/png");
+  }
+}
+
+async function copyToClipboard(base64Data) {
+  try {
+    let base64String = base64Data;
+    if (base64String.indexOf(",") > -1) {
+      base64String = base64String.split(",")[1];
+    }
+
+    if (
+      window.Capacitor &&
+      window.Capacitor.Plugins &&
+      window.Capacitor.Plugins.Clipboard
+    ) {
+      await window.Capacitor.Plugins.Clipboard.write({
+        image: base64String,
+      });
+      alert("Sticker copied! Paste it anywhere.");
+    } else {
+      try {
+        const blob = await (await fetch(base64Data)).blob();
+        // Check if Clipboard Item API is supported (Safari requires it)
+        if (typeof ClipboardItem !== "undefined") {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              [blob.type]: blob,
+            }),
+          ]);
+          alert("Sticker copied to clipboard!");
+        } else {
+          // Fallback for older browsers or non-secure context
+          alert("Clipboard API not supported in this context.");
+        }
+      } catch (err) {
+        console.error("Clipboard API failed", err);
+        alert(
+          "Could not copy to clipboard. Ensure you are on a secure (HTTPS) context."
+        );
+      }
+    }
+  } catch (e) {
+    console.error("Copy failed", e);
+    alert("Failed to copy sticker.");
+  }
+}
+
+async function shareFile(blob, filename) {
+  // Use Capacitor Native Share if available
+  if (window.Capacitor && window.Capacitor.Plugins) {
+    try {
+      const { Filesystem, Share } = window.Capacitor.Plugins;
+
+      // Convert Blob to Base64
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = async () => {
+        const base64Data = reader.result;
+        // Write to Cache
+        try {
+          // filename example: "pixy-sticker-123.png"
+          const writeFileResult = await Filesystem.writeFile({
+            path: filename,
+            data: base64Data, // WriteFile handles data URLs correctly or regular base64
+            directory: "CACHE", // Use Cache to avoid cluttering Documents
+            recursive: true,
+          });
+
+          // Shared URI
+          const uri = writeFileResult.uri;
+
+          await Share.share({
+            files: [uri], // Sharing as files triggers image context
+            dialogTitle: "Share your sticker",
+          });
+        } catch (fsErr) {
+          console.error("Filesystem write failed", fsErr);
+          // Fallback to Web Share if FS fails
+          webShareFallback(blob, filename);
+        }
+      };
+    } catch (e) {
+      console.error("Native share failed", e);
+      webShareFallback(blob, filename);
+    }
+  } else {
+    // Normal Web Environment
+    webShareFallback(blob, filename);
+  }
+}
+
+async function webShareFallback(blob, filename) {
+  if (
+    navigator.canShare &&
+    navigator.canShare({
+      files: [new File([blob], filename, { type: "image/png" })],
+    })
+  ) {
+    try {
+      const file = new File([blob], filename, { type: "image/png" });
+      await navigator.share({
+        title: "Pixy Export",
+        text: "Check out my pixel art!",
+        files: [file],
+      });
+    } catch (err) {
+      console.warn("Share failed or cancelled:", err);
+      downloadFile(blob, filename);
+    }
+  } else {
+    downloadFile(blob, filename);
+  }
+}
+
+function downloadFile(blob, filename) {
+  const link = document.createElement("a");
+  link.download = filename;
+  link.href = URL.createObjectURL(blob);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
+}
+
+// --- SAVE / DRAFT SYSTEM ---
+const saveDraftBtn = document.getElementById("saveDraftBtn");
+const savedList = document.getElementById("savedList");
+let isEditMode = false;
+
+if (saveDraftBtn) {
+  saveDraftBtn.addEventListener("click", saveDraft);
+}
+
+// Exit edit mode when clicking outside
+document.addEventListener("click", (e) => {
+  if (isEditMode && !e.target.closest(".saved-item")) {
+    toggleEditMode(false);
+  }
+});
+
+function toggleEditMode(active) {
+  isEditMode = active;
+  if (isEditMode) {
+    savedList.classList.add("edit-mode");
+    if (navigator.vibrate) navigator.vibrate(50);
+  } else {
+    savedList.classList.remove("edit-mode");
+  }
+}
+
+function saveDraft() {
+  const cells = document.querySelectorAll(".cell");
+  if (cells.length === 0) return;
+  const gridCount = Math.sqrt(cells.length);
+
+  const cellData = [];
+  cells.forEach((cell) => {
+    cellData.push({
+      color: cell.style.backgroundColor,
+      percent: cell.dataset.percent || "0",
+    });
+  });
+
+  // Generate Thumbnail
+  const canvas = document.createElement("canvas");
+  canvas.width = 100;
+  canvas.height = 100;
+  const ctx = canvas.getContext("2d");
+  const cellSize = 100 / gridCount;
+
+  cells.forEach((cell, i) => {
+    const r = Math.floor(i / gridCount);
+    const c = i % gridCount;
+    const p = cell.dataset.percent || "0";
+    if (p !== "0") {
+      ctx.fillStyle = cell.style.backgroundColor;
+      ctx.fillRect(c * cellSize, r * cellSize, cellSize + 1, cellSize + 1);
+    }
+  });
+
+  const thumbnail = canvas.toDataURL();
+
+  const save = {
+    id: Date.now(),
+    gridCount,
+    data: cellData,
+    thumbnail,
+  };
+
+  const saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+  saves.unshift(save);
+  // Limit saves to 20
+  if (saves.length > 20) saves.pop();
+  localStorage.setItem("pixy_saves", JSON.stringify(saves));
+
+  renderSavedDrawings();
+
+  // Visual Feedback
+  const originalText = saveDraftBtn.textContent;
+  saveDraftBtn.textContent = "Saved!";
+  setTimeout(() => (saveDraftBtn.textContent = originalText), 1000);
+}
+
+function renderSavedDrawings() {
+  const saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+
+  // 1. Sidebar (Desktop/Landscape)
+  if (savedList) {
+    savedList.innerHTML = "";
+    populateList(savedList, saves);
+  }
+
+  // 2. Mobile Modal Grid
+  if (mobileSavedList) {
+    mobileSavedList.innerHTML = "";
+    populateList(mobileSavedList, saves);
+  }
+}
+
+function populateList(container, saves) {
+  saves.forEach((save) => {
+    const div = document.createElement("div");
+    div.className = "saved-item";
+
+    const del = document.createElement("div");
+    del.className = "delete-save";
+    del.innerHTML = "&times;";
+    del.onclick = (e) => {
+      e.stopPropagation();
+      deleteSave(save.id);
+    };
+
+    const img = document.createElement("img");
+    img.src = save.thumbnail;
+    img.draggable = false;
+
+    // Click: Load if normal
+    div.onclick = () => {
+      if (!isEditMode) {
+        loadDraft(save);
+        // If in modal, close it
+        if (
+          document
+            .getElementById("savedProjectsModal")
+            .classList.contains("active")
+        ) {
+          toggleSavedModal();
+        }
+      }
+    };
+
+    // Long Press for "Jiggle" / Edit Mode
+    let pressTimer;
+    const startPress = () => {
+      pressTimer = setTimeout(() => {
+        toggleEditMode(true);
+      }, 600);
+    };
+    const cancelPress = () => clearTimeout(pressTimer);
+
+    div.addEventListener("pointerdown", startPress);
+    div.addEventListener("pointerup", cancelPress);
+    div.addEventListener("pointerleave", cancelPress);
+
+    div.oncontextmenu = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+    };
+
+    div.appendChild(img);
+    div.appendChild(del);
+    container.appendChild(div);
+  });
+}
+
+function deleteSave(id) {
+  if (!confirm("Delete this saved drawing?")) return;
+  let saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+  saves = saves.filter((s) => s.id !== id);
+  localStorage.setItem("pixy_saves", JSON.stringify(saves));
+
+  // If no saves left, exit edit mode
+  if (saves.length === 0) toggleEditMode(false);
+
+  renderSavedDrawings();
+}
+
+function loadDraft(save) {
+  if (
+    document.querySelectorAll(".cell[data-percent]:not([data-percent='0'])")
+      .length > 0 &&
+    !confirm("Load saved drawing? Unsaved changes will be lost.")
+  ) {
+    return;
+  }
+  createGrid(save.gridCount);
+  const cells = document.querySelectorAll(".cell");
+  save.data.forEach((d, i) => {
+    if (cells[i]) {
+      cells[i].style.backgroundColor = d.color;
+      cells[i].dataset.percent = d.percent;
+    }
+  });
+}
+
+// Init Saved Drawings
+renderSavedDrawings();

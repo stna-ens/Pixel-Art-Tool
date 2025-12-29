@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Pixel Art Mobile</string>
+        <string>Pixy</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -47,5 +47,9 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>To save your exported pixel art.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>To save your exported pixel art.</string>
 </dict>
 </plist>

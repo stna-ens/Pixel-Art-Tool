@@ -23,10 +23,12 @@ body {
   width: 100%;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-touch-callout: none; /* Disable iOS Callouts/Magnifier */
   -webkit-tap-highlight-color: transparent;
   font-family: "VT323", monospace; /* Retro Font */
   font-size: 20px; /* Slightly larger for retro readability */
   overflow: hidden; /* Prevent scrolling on main body */
+  touch-action: none; /* Disable all default touch actions (scroll/zoom) */
 }
 
 body {
@@ -137,37 +139,158 @@ button:active,
 }
 
 #undoBtn {
-  background: none;
-  border: none;
-  color: var(--text-main); /* Inherit theme color */
+  background-color: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  color: var(--btn-text);
   cursor: pointer;
   padding: 8px;
   border-radius: 0;
-  transition: background-color 0.2s;
+  transition: transform 0.1s, box-shadow 0.1s;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px; /* Touch target size */
+  width: 44px;
   height: 44px;
-  /* Override default button styles */
   margin: 0;
   appearance: none;
-  box-shadow: none;
-  position: absolute; /* Position to the left */
-  left: 10px; /* Reduced to fit better */
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  position: absolute;
+  left: 10px;
+  top: 15px; /* Lower down to avoid status bar interference */
 }
 
 #undoBtn:hover {
-  background-color: transparent;
-  transform: scale(1.1);
-  border: none; /* No border on hover for icon */
-  box-shadow: none;
+  background-color: var(--btn-hover);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 1);
+  border: 2px solid var(--btn-border);
+}
+
+#undoBtn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+  background-color: var(--btn-active-bg);
+  color: var(--btn-active-text);
 }
 
 #undoBtn svg {
-  width: 32px;
-  height: 32px;
-  filter: drop-shadow(2px 2px 0px rgba(0, 0, 0, 0.2));
+  width: 24px;
+  height: 24px;
+  filter: none;
+}
+
+#saveDraftBtn {
+  position: absolute;
+  right: 10px;
+  top: 15px;
+  height: 44px;
+  padding: 0 15px;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  font-size: 20px;
+  margin: 0;
+}
+
+#openSavedBtn {
+  position: absolute;
+  right: 10px;
+  top: 70px; /* Strictly below the Save button */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  color: var(--btn-text);
+  z-index: 100;
+}
+
+#openSavedBtn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+  background-color: var(--btn-active-bg);
+  color: var(--btn-active-text);
+}
+
+/* Saved Modal (Mobile Full Screen) */
+.saved-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-main);
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  transition: transform 0.3s ease;
+  transform: translateY(100%); /* Slide form bottom */
+}
+
+.saved-modal.active {
+  transform: translateY(0);
+}
+
+.saved-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 4px solid #000;
+  padding-bottom: 10px;
+  font-size: 32px;
+}
+
+.close-saved-btn {
+  background: #ff5555;
+  color: white;
+  width: 44px;
+  height: 44px;
+  font-size: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+}
+
+.saved-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 15px;
+  overflow-y: auto;
+  padding-bottom: 50px;
+  touch-action: pan-y; /* Enable vertical scroll */
+  -webkit-overflow-scrolling: touch; /* Momentum scroll */
+}
+
+/* Helper to hide Elements */
+.hidden {
+  display: none !important;
+}
+
+/* Mobile Portrait: Hide inline sidebar, show button */
+@media screen and (max-width: 600px) and (orientation: portrait) {
+  .saved-sidebar {
+    display: none !important;
+  }
+}
+
+/* Landscape: Hide Folder Button, Show Sidebar */
+@media screen and (orientation: landscape) {
+  #openSavedBtn {
+    display: none;
+  }
+  .saved-modal {
+    display: none; /* Never show modal in landscape, use sidebar */
+  }
+  .saved-sidebar {
+    display: flex !important; /* Force show */
+  }
 }
 
 .container {
@@ -269,8 +392,81 @@ button:active,
   opacity: 0.7;
 }
 
+/* Wrapper for Drawing Area */
+.drawing-board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+}
+
+/* Saved Sidebar - Base (Portrait) */
+.saved-sidebar {
+  width: 90%;
+  height: 100px;
+  margin-top: 10px;
+  display: flex;
+  flex-direction: row; /* Horizontal scroll */
+  gap: 10px;
+  overflow-x: auto;
+  padding: 5px;
+  border: 2px solid var(--btn-border);
+  background: var(--bg-container);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+}
+
+.saved-list {
+  display: flex;
+  gap: 10px;
+}
+
+.saved-item {
+  flex: 0 0 80px;
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--btn-border);
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+  position: relative;
+  transition: transform 0.1s;
+}
+.saved-item:hover {
+  transform: scale(1.05);
+}
+.saved-item img {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  object-fit: contain;
+}
+.saved-item .delete-save {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: #ff5555;
+  color: white;
+  width: 30px;
+  height: 30px;
+  border: 2px solid var(--btn-border);
+  border-radius: 50%;
+  text-align: center;
+  line-height: 26px;
+  font-size: 20px;
+  display: block; /* Always visible for mobile access */
+  z-index: 5;
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+}
+
+.saved-item:hover .delete-save {
+  background: red;
+  transform: scale(1.1);
+}
+
 /* Landscape Mode (Mobile & Tablet) - Side by Side Layout with CENTERED Grid */
-/* Landscape Mode (Mobile & Tablet) - Absolute Layout to Guarantee Center */
 @media screen and (orientation: landscape) {
   .content-wrapper {
     flex-direction: column;
@@ -283,13 +479,22 @@ button:active,
 
   .game-area {
     display: flex;
-    align-items: center; /* Vertical Center */
-    justify-content: center; /* Horizontal Center (Grid) */
+    flex-direction: row; /* Side by Side */
+    align-items: center;
+    justify-content: center;
     width: 100%;
     flex: 1;
     position: relative;
   }
 
+  .drawing-board {
+    height: 100%;
+    /* Ensure content is centered */
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Tools positioning relative to drawing-board */
   .tools {
     position: absolute;
     /* Calculated placement: 50% (Center) + 40vmin (Half Grid) + 20px (Gap) */
@@ -305,6 +510,41 @@ button:active,
     margin: 0;
     gap: 15px;
     z-index: 20; /* Ensure above anything */
+  }
+
+  /* Absolute Sidebar to keep Grid centered strictly */
+  .saved-sidebar {
+    position: absolute;
+    right: 30px; /* Margined from screen border */
+    top: 50%;
+    transform: translateY(-50%); /* Center Vertically */
+
+    width: 120px;
+    max-height: 80vh; /* Don't touch edges */
+    height: auto;
+
+    flex-direction: column; /* Vertical list */
+    align-items: center; /* Center previews */
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    background: var(--bg-container);
+    margin: 0;
+    z-index: 30;
+
+    /* Enhance floating look */
+    border-radius: 0;
+    box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+  }
+
+  .saved-list {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+
+  .saved-item {
+    margin: 5px 0;
   }
 
   /* The Grid Container */
@@ -339,18 +579,18 @@ button:active,
   opacity: 1;
 }
 
-/* Modal Content */
 .modal-content {
   background-color: var(--bg-container);
-  margin: 5% auto; /* 5% from top and centered */
+  /* Add safe area inset for dynamic island/notch */
+  margin: max(5%, env(safe-area-inset-top) + 10px) auto 5% auto;
   padding: 20px;
   border: 2px solid var(--btn-border);
-  width: 90%; /* Responsive width */
-  max-width: 600px; /* Desktop max width */
-  max-height: 85vh; /* Prevent overflowing screen height */
-  overflow-y: auto; /* Scrollable if content is too long */
-  border-radius: 0; /* Sharp */
-  box-shadow: 10px 10px 0px rgba(0, 0, 0, 1); /* Hard Shadow */
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow-y: auto;
+  border-radius: 0;
+  box-shadow: 10px 10px 0px rgba(0, 0, 0, 1);
 
   /* Animation Start State */
   transform: scale(0.9);
@@ -501,4 +741,356 @@ button:active,
   justify-content: space-between;
   align-items: center;
   font-size: 18px;
+}
+
+/* Export Floating Button */
+.export-container {
+  position: fixed;
+  bottom: 130px; /* Raised to avoid Saved Sidebar */
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+/* ... existing floating-btn styles ... */
+
+/* Mobile Portrait: Floating Cell Count Bar */
+/* --- GLOBAL CELL COUNT MODAL --- */
+.cell-count-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 320px;
+  background: var(--bg-container);
+  border: 4px solid #000;
+  box-shadow: 10px 10px 0px rgba(0, 0, 0, 1); /* Deep Retro Shadow */
+  z-index: 10000; /* Always on top */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  animation: modalPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.cell-count-modal.hidden {
+  display: none !important;
+}
+
+@keyframes modalPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  font-size: 32px;
+  text-transform: uppercase;
+  border-bottom: 4px solid #000;
+  width: 100%;
+  text-align: center;
+  padding-bottom: 5px;
+}
+
+.modal-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  background: #fff;
+  border: 2px solid #000;
+  outline: none;
+  margin: 10px 0;
+}
+
+.modal-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  background: var(--btn-bg);
+  border: 2px solid #000;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+.input-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.cell-count-modal input[type="number"] {
+  flex: 1;
+  height: 50px;
+  font-size: 32px;
+  font-family: "VT323", monospace;
+  text-align: center;
+  border: 2px solid #000;
+  background: #fff;
+}
+
+.cell-count-modal button {
+  flex: 1;
+  height: 50px;
+  font-size: 24px;
+  margin: 0;
+}
+
+.close-modal-btn {
+  width: 100%;
+  background: #ff5555 !important;
+  color: white !important;
+}
+
+/* Landscape: "Push" Layout behavior for Cell Count */
+@media screen and (orientation: landscape) {
+  /* Reset Fixed Modal styles to be an Inline-ish Panel */
+  .cell-count-modal {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    /* Position: Next to the Centered Grid */
+    /* Grid Left Edge ~= 50% - 40vmin */
+    /* Place Panel 15px to left of Grid */
+    left: auto;
+    right: calc(50% + 40vmin + 15px);
+    width: 100px; /* Slimmer */
+    height: auto;
+    max-width: none;
+    background: var(--bg-container);
+    border: 2px solid var(--btn-border);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+    z-index: 100 !important;
+    padding: 20px 10px; /* More vertical padding */
+    animation: none;
+
+    /* Layout inside the panel */
+    flex-direction: column;
+    gap: 15px; /* More gap */
+    align-items: center; /* Center everything */
+  }
+
+  /* When hidden, it actually disappears (handled by base .hidden) */
+  .cell-count-modal.hidden {
+    display: none !important;
+  }
+
+  .modal-slider {
+    /* Vertical Slider in Landscape */
+    transform: rotate(-90deg);
+    width: 100px;
+    height: 10px;
+    margin: 60px 0; /* More Space for rotation */
+  }
+
+  .input-row {
+    flex-direction: column;
+    width: 100%;
+    align-items: center; /* Center input */
+    gap: 5px;
+  }
+
+  .cell-count-modal input[type="number"] {
+    width: 100%;
+    height: 40px;
+    font-size: 24px;
+    text-align: center; /* Explicit center */
+  }
+
+  .cell-count-modal button {
+    height: 30px; /* Smaller button */
+    font-size: 16px;
+    width: 100%;
+    line-height: 26px; /* Center text vertical */
+  }
+
+  .modal-header {
+    font-size: 18px; /* Smaller text */
+    border-bottom: 2px solid;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* TOOLS Animation - The "Push" Effect */
+  .tools {
+    transition: right 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Default pos: 20px from Grid */
+    right: calc(50% + 40vmin + 20px);
+    z-index: 90;
+  }
+
+  /* When Panel is OPEN, move Tools further left */
+  body.cell-panel-open .tools {
+    /* Move left by Panel Width (100px) + Gap (15px) */
+    right: calc(50% + 40vmin + 20px + 100px + 15px);
+  }
+}
+
+#openSavedBtn svg {
+  pointer-events: none; /* Ensure clicks pass to button */
+}
+
+.floating-btn {
+  background-color: var(--btn-bg);
+  color: var(--btn-text);
+  border: 2px solid var(--btn-border);
+  width: 60px;
+  height: 60px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+  cursor: pointer;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.floating-btn:hover {
+  background-color: var(--btn-hover);
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+}
+
+.floating-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+  background-color: var(--btn-active-bg);
+  color: var(--btn-active-text);
+}
+
+.export-menu {
+  background-color: var(--bg-container);
+  border: 2px solid var(--btn-border);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+  margin-bottom: 5px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.export-menu.hidden {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+}
+
+.export-menu button {
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 20px;
+  text-align: left;
+  justify-content: flex-start;
+  height: auto;
+  min-width: 200px;
+}
+
+/* Cell Count Inline Panel */
+@keyframes jiggle {
+  0% {
+    transform: rotate(-1deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+  100% {
+    transform: rotate(-1deg);
+  }
+}
+
+.edit-mode .saved-item {
+  animation: jiggle 0.2s infinite linear;
+  border-color: red;
+}
+
+.edit-mode .saved-item .delete-save {
+  display: block;
+  transform: scale(1.2);
+}
+
+.cell-panel-content input[type="number"] {
+  width: 60px;
+  height: 40px;
+  text-align: center;
+  font-size: 24px;
+  font-family: "VT323", monospace;
+  border: 2px solid var(--btn-border);
+  border-radius: 0;
+  background: var(--bg-cell);
+  color: var(--text-main);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+}
+
+.cell-panel-content input[type="number"]:focus {
+  outline: none;
+  border-color: var(--btn-active-bg);
+}
+
+.cell-panel-content button {
+  padding: 5px 15px;
+  height: auto;
+  font-size: 20px;
+}
+
+/* Vertical Slider - Retro Style */
+.vertical-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 10px;
+  background: var(--bg-cell);
+  border: 2px solid var(--btn-border);
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: inset 2px 2px 0px rgba(0, 0, 0, 0.2);
+
+  /* Rotate to make vertical */
+  transform: rotate(-90deg);
+  transform-origin: center;
+  margin: 50px 0;
+}
+
+.vertical-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+.vertical-slider::-webkit-slider-thumb:hover {
+  background: var(--btn-hover);
+}
+
+.vertical-slider::-webkit-slider-thumb:active {
+  background: var(--btn-active-bg);
+  box-shadow: 1px 1px 0px rgba(0, 0, 0, 1);
+}
+
+.vertical-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: var(--btn-bg);
+  border: 2px solid var(--btn-border);
+  border-radius: 0;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
 }
