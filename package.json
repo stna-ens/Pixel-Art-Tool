@@ -4,6 +4,7 @@
   "description": "Pixel Art Tool Mobile App",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo 'No build required'",
     "ios": "cap open ios",
     "android": "cap open android"
   },

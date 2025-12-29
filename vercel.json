@@ -1,8 +1,6 @@
 {
-  "cleanUrls": true,
-  "trailingSlash": false,
   "rewrites": [
-    { "source": "/:path*", "destination": "/www/:path*" },
-    { "source": "/", "destination": "/www/index.html" }
+    { "source": "/", "destination": "/www/index.html" },
+    { "source": "/(.*)", "destination": "/www/$1" }
   ]
 }
