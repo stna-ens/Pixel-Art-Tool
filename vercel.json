@@ -1,7 +1,21 @@
 {
   "version": 2,
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/www/$1" },
-    { "source": "/", "destination": "/www/index.html" }
+    { "source": "/style.css", "destination": "/www/style.css" },
+    { "source": "/script.js", "destination": "/www/script.js" },
+    { "source": "/icon.png", "destination": "/www/icon.png" },
+    { "source": "/", "destination": "/www/index.html" },
+    { "source": "/(.*)", "destination": "/www/index.html" }
   ]
 }
