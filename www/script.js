@@ -78,6 +78,11 @@ function initApp() {
   // Attach Event Listeners to Container
   attachContainerListeners();
 
+  // Prevent native drag behavior on desktop which interrupts drawing
+  container.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+  });
+
   // Create Initial Grid
   createGrid(16);
 
@@ -1277,11 +1282,6 @@ function applyTheme(themeObj) {
     }
   });
 }
-
-// Prevent native drag behavior on desktop which interrupts drawing
-container.addEventListener("mousedown", (e) => {
-  e.preventDefault();
-});
 
 /* Export Logic */
 const exportMainBtn = document.getElementById("exportMainBtn");
