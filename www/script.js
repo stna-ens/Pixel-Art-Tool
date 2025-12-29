@@ -39,46 +39,75 @@ document.addEventListener("pointerup", (e) => {
   }
 });
 
-const container = document.createElement("div");
-container.classList.add("container");
+// Main initialization
+document.addEventListener("DOMContentLoaded", () => {
+  initApp();
+});
+
+let container; // Global reference
 const tools = document.getElementById("tools");
-tools.parentNode.insertBefore(container, tools);
 
-// 1. Pointer Down (Start Drawing)
-container.addEventListener("pointerdown", (e) => {
-  // Only left click or touch
-  if (e.button !== 0 && e.pointerType === "mouse") return;
-
-  e.preventDefault(); // Prevent scroll/drag
-  isDrawing = true;
-  currentStroke = [];
-  container.setPointerCapture(e.pointerId); // CRITICAL: Captures all moves even if they leave elements
-
-  handlePointerDraw(e);
-});
-
-// 2. Pointer Move (Draw Stroke)
-container.addEventListener("pointermove", (e) => {
-  if (isDrawing) {
-    e.preventDefault();
-    handlePointerDraw(e);
+function initApp() {
+  container = document.createElement("div");
+  container.classList.add("container");
+  if (tools && tools.parentNode) {
+    tools.parentNode.insertBefore(container, tools);
+  } else {
+    // Fallback if tools not found (shouldn't happen)
+    document.getElementById("drawingBoard").appendChild(container);
   }
-});
 
-// 3. Pointer Up (Stop Drawing)
-container.addEventListener("pointerup", (e) => {
-  isDrawing = false;
-  lastTouchedElement = null;
-  container.releasePointerCapture(e.pointerId);
+  // Attach Event Listeners to Container
+  attachContainerListeners();
 
-  if (currentStroke.length > 0) {
-    historyStack.push(currentStroke);
-    if (historyStack.length > MAX_HISTORY) {
-      historyStack.shift();
-    }
+  // Create Initial Grid
+  createGrid(16);
+
+  // Init Saved Drawings Safely
+  try {
+    renderSavedDrawings();
+  } catch (e) {
+    console.warn("Failed to render saved drawings", e);
+  }
+}
+
+// 1. Pointer Down (Start Drawing) - Moved to function
+function attachContainerListeners() {
+  container.addEventListener("pointerdown", (e) => {
+    // Only left click or touch
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+
+    e.preventDefault(); // Prevent scroll/drag
+    isDrawing = true;
     currentStroke = [];
-  }
-});
+    container.setPointerCapture(e.pointerId); // CRITICAL: Captures all moves even if they leave elements
+
+    handlePointerDraw(e);
+  });
+
+  // 2. Pointer Move (Draw Stroke)
+  container.addEventListener("pointermove", (e) => {
+    if (isDrawing) {
+      e.preventDefault();
+      handlePointerDraw(e);
+    }
+  });
+
+  // 3. Pointer Up (Stop Drawing)
+  container.addEventListener("pointerup", (e) => {
+    isDrawing = false;
+    lastTouchedElement = null;
+    container.releasePointerCapture(e.pointerId);
+
+    if (currentStroke.length > 0) {
+      historyStack.push(currentStroke);
+      if (historyStack.length > MAX_HISTORY) {
+        historyStack.shift();
+      }
+      currentStroke = [];
+    }
+  });
+}
 
 // Unified Handler
 function handlePointerDraw(e) {
@@ -1095,7 +1124,7 @@ if (defaultThemes[activeThemeId]) {
 applyTheme(initialColors);
 
 // 4. Create Grid (Classic Mode) - Critical Fix: Must run NOW.
-createGrid(16);
+// createGrid(16); // Managed by initApp now
 
 // 5. Render Options
 renderThemeOptions();
@@ -1687,11 +1716,4 @@ function loadDraft(save) {
       cells[i].dataset.percent = d.percent;
     }
   });
-}
-
-// Init Saved Drawings Safely
-try {
-  renderSavedDrawings();
-} catch (e) {
-  console.warn("Failed to render saved drawings (Storage access denied?)", e);
 }
