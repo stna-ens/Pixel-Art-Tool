@@ -1,5 +1,5 @@
 {
   "appId": "pixy-mobile",
   "appName": "Pixy",
-  "webDir": "www"
+  "webDir": "public"
 }
