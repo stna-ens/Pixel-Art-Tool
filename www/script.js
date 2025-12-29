@@ -40,15 +40,7 @@ document.addEventListener("pointerup", (e) => {
 });
 
 // Main initialization
-const savedList = document.getElementById("savedList");
-const mobileSavedList = document.getElementById("mobileSavedList");
-const savedProjectsModal = document.getElementById("savedProjectsModal");
-const openSavedBtn = document.getElementById("openSavedBtn"); 
-
 document.addEventListener("DOMContentLoaded", () => {
-    // ... existing initialization ...
-});
-
   initApp();
 });
 
@@ -376,6 +368,7 @@ applyCellCountBtn.onclick = () => {
 const savedProjectsModal = document.getElementById("savedProjectsModal");
 const openSavedBtn = document.getElementById("openSavedBtn");
 const mobileSavedList = document.getElementById("mobileSavedList");
+const savedList = document.getElementById("savedList"); // Moved here to fix initialization order
 
 function toggleSavedModal() {
   savedProjectsModal.classList.toggle("active");
@@ -1552,7 +1545,7 @@ function downloadFile(blob, filename) {
 
 // --- SAVE / DRAFT SYSTEM ---
 const saveDraftBtn = document.getElementById("saveDraftBtn");
-const savedList = document.getElementById("savedList");
+// savedList is declared earlier at line 371
 let isEditMode = false;
 
 if (saveDraftBtn) {
