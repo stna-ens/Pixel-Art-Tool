@@ -764,22 +764,17 @@ button:active,
   gap: 10px;
 }
 
-/* Mobile Portrait: Lower Export Button (Sidebar is hidden) */
+/* Mobile Portrait: Lower Export Button + Safe Area + Scroll Space */
 @media screen and (max-width: 600px) and (orientation: portrait) {
   .export-container {
-    bottom: 20px;
+    /* Sit above the home indicator + 20px margin */
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px));
   }
 
-  /* Also ensure tools don't get covered if user scrolls? 
-     Actually, export button is fixed. Tools are in flow.
-     If tools are at bottom, button might cover.
-     Let's add padding-bottom to body?
-     Body has padding-bottom: 20px. 
-     Tools might be near bottom.
-     
-     If I put Export at bottom-right, it covers the "Made by..." footer?
-     Yes. But that's better than covering the buttons.
-  */
+  .content-wrapper {
+    /* Ensure content scroll clears the floating button */
+    padding-bottom: 120px;
+  }
 }
 
 /* ... existing floating-btn styles ... */
