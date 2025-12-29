@@ -199,29 +199,29 @@
       </button>
     </div>
 
-    <!-- Floating Saved Projects Button (Moved to Body) -->
+    <!-- Floating Saved Projects Button (Matched to Export Button) -->
     <button
       id="openSavedBtn"
       title="Saved Projects"
       style="
         display: flex !important;
         position: fixed !important;
-        bottom: 20px !important;
+        bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px)) !important;
         left: 20px !important;
         z-index: 9999 !important;
-        width: 44px;
-        height: 44px;
+        width: 60px;
+        height: 60px;
         align-items: center;
         justify-content: center;
         background-color: var(--btn-bg);
         border: 2px solid #000;
-        box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+        box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
       "
     >
       <svg
         viewBox="0 0 24 24"
-        width="24"
-        height="24"
+        width="32"
+        height="32"
         shape-rendering="crispEdges"
       >
         <path fill="currentColor" d="M2,6 L2,18 L22,18 L22,8 L12,8 L10,6 Z" />
