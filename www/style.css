@@ -86,6 +86,7 @@ button,
   cursor: pointer;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 1); /* Hard Shadow */
   transition: transform 0.1s, box-shadow 0.1s;
+  touch-action: manipulation; /* Allow touch on buttons despite body touch-action: none */
 }
 
 button:hover,
