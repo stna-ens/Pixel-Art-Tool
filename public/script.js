@@ -45,16 +45,28 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 let container; // Global reference
-const tools = document.getElementById("tools");
+// const tools reference moved inside initApp to prevent race conditions
 
 function initApp() {
+  // Mobile Debug Logger (Temporary)
+  window.onerror = function (msg, source, lineno, colno, error) {
+    const errDiv = document.createElement("div");
+    errDiv.style.cssText =
+      "position:fixed;top:0;left:0;right:0;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-size:14px;font-family:monospace;pointer-events:none;white-space:pre-wrap;";
+    errDiv.innerText = "Error: " + msg + "\nLine: " + lineno;
+    document.body.appendChild(errDiv);
+  };
+
+  const tools = document.getElementById("tools");
   container = document.createElement("div");
   container.classList.add("container");
+
   if (tools && tools.parentNode) {
     tools.parentNode.insertBefore(container, tools);
   } else {
-    // Fallback if tools not found (shouldn't happen)
-    document.getElementById("drawingBoard").appendChild(container);
+    // Fallback if tools not found
+    const board = document.getElementById("drawingBoard");
+    if (board) board.appendChild(container);
   }
 
   // Attach Event Listeners to Container
