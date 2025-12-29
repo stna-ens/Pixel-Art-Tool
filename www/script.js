@@ -11,6 +11,19 @@ const MAX_HISTORY = 50;
 // Cached base colors for color mixing (set by applyTheme)
 let cachedBaseColors = { r: 255, g: 255, b: 255 };
 
+// Cache the CURRENT drawing color as an object {r,g,b} to avoid parsing on every pixel
+let cachedCurrentColorRGB = { r: 0, g: 0, b: 0 };
+
+function updateCachedColor() {
+  if (currentColor.startsWith("#")) {
+    const rgb = hexToRgb(currentColor);
+    if (rgb) cachedCurrentColorRGB = rgb;
+  } else {
+    const parsed = parseColorString(currentColor);
+    if (parsed) cachedCurrentColorRGB = parsed;
+  }
+}
+
 document.body.addEventListener("mousedown", () => {
   isDrawing = true;
   currentStroke = []; // Start new stroke
@@ -109,6 +122,14 @@ function getBaseColors() {
 
 function changeColor(e) {
   try {
+    // FORCE DRAW if this is an explicit start event, even if isDrawing is false
+    // This fixes "ignored" taps
+    const isStartEvent = e.type === "mousedown" || e.type === "touchstart";
+
+    if (isStartEvent) {
+      isDrawing = true;
+    }
+
     if (e.type === "mouseover" && !isDrawing) return;
 
     const target = e.target;
@@ -138,22 +159,10 @@ function changeColor(e) {
         targetG = 0,
         targetB = 0;
 
-      // Parse current color robustly
-      if (currentColor.startsWith("#")) {
-        const result = hexToRgb(currentColor);
-        if (result) {
-          targetR = result.r;
-          targetG = result.g;
-          targetB = result.b;
-        }
-      } else {
-        const parsed = parseColorString(currentColor);
-        if (parsed) {
-          targetR = parsed.r;
-          targetG = parsed.g;
-          targetB = parsed.b;
-        }
-      }
+      // Use CACHED color (Performance critical)
+      targetR = cachedCurrentColorRGB.r;
+      targetG = cachedCurrentColorRGB.g;
+      targetB = cachedCurrentColorRGB.b;
 
       // Safe mixing logic (prevent NaN but allow floats)
       const mix = currentPercent / 100;
@@ -239,18 +248,21 @@ function handleTouch(e) {
 const colorPicker = document.getElementById("colorPicker");
 // Initialize from the actual DOM value so what user sees is what they get
 currentColor = colorPicker.value || "#000000";
+updateCachedColor();
 
 const eraserBtn = document.getElementById("eraserBtn");
 const undoBtn = document.getElementById("undoBtn");
 
 colorPicker.oninput = (e) => {
   currentColor = e.target.value;
+  updateCachedColor();
   isErasing = false;
   eraserBtn.classList.remove("active");
 };
 // Add onchange for better mobile compatibility
 colorPicker.onchange = (e) => {
   currentColor = e.target.value;
+  updateCachedColor();
   isErasing = false;
   eraserBtn.classList.remove("active");
 };
@@ -1132,3 +1144,8 @@ function applyTheme(themeObj) {
     }
   });
 }
+
+// Prevent native drag behavior on desktop which interrupts drawing
+container.addEventListener("mousedown", (e) => {
+  e.preventDefault();
+});
