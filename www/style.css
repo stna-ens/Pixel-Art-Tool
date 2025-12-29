@@ -200,13 +200,11 @@ button:active,
 }
 
 #openSavedBtn {
-  position: absolute;
-  right: 10px;
-  top: 70px; /* Strictly below the Save button */
+  display: none; /* Hidden by default, specifically enabled for Mobile Portrait */
+  position: fixed;
   width: 44px;
   height: 44px;
   padding: 0;
-  display: flex;
   align-items: center;
   justify-content: center;
   background-color: var(--btn-bg);
@@ -290,6 +288,7 @@ button:active,
 
   /* Move Saved Button to Bottom Left (Fixed) */
   #openSavedBtn {
+    display: flex !important; /* Force show */
     position: fixed;
     top: auto;
     right: auto;
