@@ -1581,7 +1581,13 @@ function saveDraft() {
 }
 
 function renderSavedDrawings() {
-  const saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+  let saves = [];
+  try {
+    saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+  } catch (e) {
+    console.warn("LocalStorage access failed", e);
+    return; // Exit if we can't read saves
+  }
 
   // 1. Sidebar (Desktop/Landscape)
   if (savedList) {
@@ -1683,5 +1689,9 @@ function loadDraft(save) {
   });
 }
 
-// Init Saved Drawings
-renderSavedDrawings();
+// Init Saved Drawings Safely
+try {
+  renderSavedDrawings();
+} catch (e) {
+  console.warn("Failed to render saved drawings (Storage access denied?)", e);
+}
