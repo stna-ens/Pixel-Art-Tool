@@ -288,9 +288,14 @@ button:active,
     display: none !important;
   }
 
-  /* Add space below header for the absolutely positioned Saved Folder button */
-  .header {
-    margin-bottom: 90px;
+  /* Move Saved Button to Bottom Left (Fixed) */
+  #openSavedBtn {
+    position: fixed;
+    top: auto;
+    right: auto;
+    bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px));
+    left: 20px;
+    z-index: 1000;
   }
 }
 
