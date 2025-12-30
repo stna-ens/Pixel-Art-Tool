@@ -134,6 +134,9 @@ function attachContainerListeners() {
         historyStack.shift();
       }
       currentStroke = [];
+
+      // Update preview for active layer
+      updateLayerPreview(activeLayerIndex);
     }
   });
 }
@@ -213,9 +216,19 @@ function undo() {
   // This ensures if a cell was changed multiple times in one stroke,
   // we revert to the absolute oldest state first, effectively rewinding time correctly.
   lastStroke.reverse().forEach((item) => {
-    item.element.style.backgroundColor = item.prevColor || "var(--bg-cell)";
+    item.element.style.backgroundColor = item.prevColor || "transparent";
     item.element.dataset.percent = item.prevPercent || 0;
   });
+
+  // Update preview for active layer (assuming separate history stacks per layer? No, history is global stroke list)
+  // Undo restores cells. We should update the preview of the layer those cells belong to.
+  // We can optimize or just update the active layer info?
+  // A stroke usually belongs to one layer. We can assume active layer.
+  // BUT if we switched layers, undid a stroke on a different layer?
+  // Our historyStack stores `element`. We can find the parent layer?
+  // Simpler: Just update active layer preview, as user likely just undid their last action on that layer.
+  // If we support cross-layer undo later, we need to be smarter.
+  updateLayerPreview(activeLayerIndex);
 }
 
 // 5. Change Color (Pure Logic) - calling with 'target' element
@@ -225,12 +238,16 @@ function changeColor(target) {
     // const target = target; // (passed in)
     // Capture state BEFORE modification
     const prevColor = target.style.backgroundColor;
+    // Check if transparent or default
+    const isTransparent =
+      prevColor === "transparent" || prevColor === "rgba(0, 0, 0, 0)";
+
     const prevPercent = target.dataset.percent || 0;
 
     if (isErasing) {
-      target.style.backgroundColor = "var(--bg-cell)";
+      target.style.backgroundColor = "transparent";
       target.dataset.percent = 0;
-      addToCurrentStroke(target, prevColor, prevPercent, "var(--bg-cell)", 0);
+      addToCurrentStroke(target, prevColor, prevPercent, "transparent", 0);
       return;
     }
 
@@ -278,24 +295,277 @@ function changeColor(target) {
   }
 }
 
-function createGrid(gridNumber) {
-  container.innerHTML = "";
-  historyStack = []; // Clear history on new grid
-  gridNumber = parseInt(gridNumber);
-  if (gridNumber > 0 && gridNumber < 101) {
-    for (let i = 0; i < gridNumber * gridNumber; i++) {
-      const cell = document.createElement("div");
-      cell.classList.add("cell");
-      const cellSize = 100 / gridNumber;
-      cell.style.width = `${cellSize}%`;
-      cell.style.height = `${cellSize}%`;
-      container.appendChild(cell);
-      cell.dataset.percent = "0"; // Initialize percent state
-      cell.style.backgroundColor = "var(--bg-cell)";
-      cell.dataset.percent = "0"; // Initialize percent state
-      cell.style.backgroundColor = "var(--bg-cell)";
+// --- LAYER LOGIC ---
+let layers = []; // Array of { id, name, containerDiv, previewDataUrl }
+let activeLayerIndex = 0;
+let layerCounter = 1; // Unique ID counter
+
+// Off-screen canvas for generating previews
+const previewCanvas = document.createElement("canvas");
+const previewCtx = previewCanvas.getContext("2d");
+previewCanvas.width = 32; // Small resolution is enough
+previewCanvas.height = 32;
+
+function generateLayerPreview(layer) {
+  if (!layer || !layer.div) return "";
+
+  // Clear canvas
+  previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+
+  const cells = layer.div.querySelectorAll(".cell");
+  const size = Math.sqrt(cells.length);
+  const cellW = previewCanvas.width / size;
+  const cellH = previewCanvas.height / size;
+
+  cells.forEach((cell, i) => {
+    const bg = cell.style.backgroundColor;
+    if (
+      bg &&
+      bg !== "transparent" &&
+      bg !== "rgba(0, 0, 0, 0)" &&
+      bg !== "var(--bg-cell)"
+    ) {
+      previewCtx.fillStyle = bg;
+      const x = (i % size) * cellW;
+      const y = Math.floor(i / size) * cellH;
+      previewCtx.fillRect(x, y, cellW, cellH);
+    }
+  });
+
+  return previewCanvas.toDataURL();
+}
+
+// Update the preview for a specific layer index
+function updateLayerPreview(index) {
+  if (index >= 0 && index < layers.length) {
+    layers[index].previewDataUrl = generateLayerPreview(layers[index]);
+
+    // Efficient DOM update if list exists
+    const listItems = document.querySelectorAll(".layer-item");
+    // Since list is rendered Top-to-Bottom (reverse array order), index match requires math
+    // List Item 0 = Layer [length-1]
+    // List Item k = Layer [length-1-k]
+    // So Layer i = List Item [length-1-i]
+    const domIndex = layers.length - 1 - index;
+
+    if (listItems[domIndex]) {
+      const img = listItems[domIndex].querySelector(".layer-preview");
+      if (img) img.src = layers[index].previewDataUrl;
     }
   }
+}
+
+function createGrid(gridNumber) {
+  // Reset System
+  container.innerHTML = "";
+  historyStack = [];
+  layers = [];
+  layerCounter = 1;
+  activeLayerIndex = 0;
+
+  // Validate Grid Number
+  gridNumber = parseInt(gridNumber);
+  if (gridNumber < 1) gridNumber = 1;
+  if (gridNumber > 100) gridNumber = 100;
+
+  // Store grid number globally for adding new layers
+  window.currentGridNumber = gridNumber;
+
+  // Create First Layer
+  addLayer();
+
+  // Update Layer UI
+  renderLayerList();
+}
+
+function addLayer() {
+  const index = layers.length;
+  const layerId = layerCounter++;
+  const layerName = `Layer ${layerId}`;
+
+  const layerDiv = document.createElement("div");
+  layerDiv.classList.add("layer-container");
+  layerDiv.dataset.layerId = layerId;
+  layerDiv.style.zIndex = index + 1; // z-index starts at 1
+
+  // Fill with cells
+  const gridNumber = window.currentGridNumber || 16;
+  for (let i = 0; i < gridNumber * gridNumber; i++) {
+    const cell = document.createElement("div");
+    cell.classList.add("cell");
+    const cellSize = 100 / gridNumber;
+    cell.style.width = `${cellSize}%`;
+    cell.style.height = `${cellSize}%`;
+
+    // Default transparent
+    cell.style.backgroundColor = "transparent";
+    cell.dataset.percent = "0";
+
+    layerDiv.appendChild(cell);
+  }
+
+  container.appendChild(layerDiv);
+
+  const newLayer = {
+    id: layerId,
+    name: layerName,
+    div: layerDiv,
+    previewDataUrl: "", // Init empty
+  };
+
+  layers.push(newLayer);
+
+  // Generate initial blank preview
+  updateLayerPreview(layers.length - 1);
+
+  // Automatically switch to new layer
+  setActiveLayer(layers.length - 1);
+  renderLayerList();
+}
+
+function setActiveLayer(index) {
+  if (index < 0 || index >= layers.length) return;
+  activeLayerIndex = index;
+
+  // Update DOM classes for pointer-events
+  layers.forEach((layer, idx) => {
+    if (idx === activeLayerIndex) {
+      layer.div.classList.add("active");
+    } else {
+      layer.div.classList.remove("active");
+    }
+  });
+
+  renderLayerList();
+}
+
+function deleteLayer() {
+  if (layers.length <= 1) {
+    alert("Cannot delete the last layer!");
+    return;
+  }
+
+  // Remove from DOM
+  const layerToRemove = layers[activeLayerIndex];
+  container.removeChild(layerToRemove.div);
+
+  // Remove from array
+  layers.splice(activeLayerIndex, 1);
+
+  // Update active index
+  if (activeLayerIndex >= layers.length) {
+    activeLayerIndex = layers.length - 1;
+  }
+
+  updateLayerZIndices();
+  setActiveLayer(activeLayerIndex);
+  renderLayerList();
+
+  // Clear Undo History to avoid ghost references
+  historyStack = [];
+}
+
+function moveLayerUp() {
+  if (activeLayerIndex >= layers.length - 1) return; // Already top
+
+  // Swap in array
+  const current = layers[activeLayerIndex];
+  layers[activeLayerIndex] = layers[activeLayerIndex + 1];
+  layers[activeLayerIndex + 1] = current;
+
+  // Update active index
+  activeLayerIndex++;
+
+  updateLayerZIndices();
+  setActiveLayer(activeLayerIndex);
+}
+
+function moveLayerDown() {
+  if (activeLayerIndex <= 0) return; // Already bottom
+
+  // Swap in array
+  const current = layers[activeLayerIndex];
+  layers[activeLayerIndex] = layers[activeLayerIndex - 1];
+  layers[activeLayerIndex - 1] = current;
+
+  // Update active index
+  activeLayerIndex--;
+
+  updateLayerZIndices();
+  setActiveLayer(activeLayerIndex);
+}
+
+function updateLayerZIndices() {
+  layers.forEach((layer, index) => {
+    // index 0 is bottom, so z-index 1
+    layer.div.style.zIndex = index + 1;
+  });
+}
+
+// UI Rendering
+const layersListEl = document.getElementById("layersList");
+
+function renderLayerList() {
+  if (!layersListEl) return;
+  layersListEl.innerHTML = "";
+
+  // Render in reverse order (Top layer at top of list)
+  // We use a for loop from length-1 to 0
+  for (let i = layers.length - 1; i >= 0; i--) {
+    const layer = layers[i];
+    const item = document.createElement("div");
+    item.classList.add("layer-item");
+    if (i === activeLayerIndex) item.classList.add("active");
+
+    // Thumbnail
+    const img = document.createElement("img");
+    img.classList.add("layer-preview");
+    img.src =
+      layer.previewDataUrl ||
+      "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"; // 1x1 transparent
+    item.appendChild(img);
+
+    // Name Label REMOVED for square-only aesthetic
+    // const span = document.createElement("span");
+    // span.innerText = layer.name;
+    // span.style.flex = "1";
+    // item.appendChild(span);
+
+    item.onclick = () => setActiveLayer(i);
+
+    layersListEl.appendChild(item);
+  }
+}
+
+// Setup Layer UI Controls
+document.getElementById("addLayerBtn")?.addEventListener("click", addLayer);
+document
+  .getElementById("deleteLayerBtn")
+  ?.addEventListener("click", deleteLayer);
+document
+  .getElementById("moveLayerUpBtn")
+  ?.addEventListener("click", moveLayerUp);
+document
+  .getElementById("moveLayerDownBtn")
+  ?.addEventListener("click", moveLayerDown);
+
+// Panel Toggle
+const layersPanel = document.getElementById("layersPanel");
+const layersBtn = document.getElementById("layersBtn");
+const closeLayersBtn = document.getElementById("closeLayersBtn");
+
+if (layersBtn) {
+  layersBtn.onclick = () => {
+    layersPanel.classList.toggle("hidden");
+    layersPanel.classList.toggle("active"); // For mobile slide-up
+  };
+}
+
+if (closeLayersBtn) {
+  closeLayersBtn.onclick = () => {
+    layersPanel.classList.add("hidden");
+    layersPanel.classList.remove("active");
+  };
 }
 
 const colorPicker = document.getElementById("colorPicker");
@@ -412,7 +682,7 @@ resetBtn.addEventListener("click", () => {
         element: cell,
         prevColor: cell.style.backgroundColor,
         prevPercent: cell.dataset.percent,
-        newColor: "var(--bg-cell)",
+        newColor: "transparent",
         newPercent: 0,
       });
     }
@@ -429,9 +699,14 @@ resetBtn.addEventListener("click", () => {
 
   // Now clear the canvas
   cells.forEach((cell) => {
-    cell.style.backgroundColor = "var(--bg-cell)";
+    cell.style.backgroundColor = "transparent";
     cell.dataset.percent = 0;
   });
+
+  // Update preview for active layer (since we only cleared active, or TODO: Reset clears ALL layers?)
+  // Reset logic currently loops through `document.querySelectorAll(".cell")` which grabs ALL cells in ALL layers.
+  // So we must update ALL previews.
+  layers.forEach((l, i) => updateLayerPreview(i));
 });
 
 /* Theme Logic */

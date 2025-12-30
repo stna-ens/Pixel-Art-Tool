@@ -207,8 +207,6 @@ button:active,
 #openSavedBtn {
   display: none; /* Hidden by default, specifically enabled for Mobile Portrait */
   position: fixed;
-  width: 44px;
-  height: 44px;
   padding: 0;
   align-items: center;
   justify-content: center;
@@ -322,16 +320,16 @@ button:active,
 }
 
 .container {
-  display: flex;
-  box-shadow: 8px 8px 0px rgba(0, 0, 0, 1); /* Hard Retro Shadow */
+  position: relative; /* Changed from flex for Layering */
+  display: block; /* Changed from flex for Layering */
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
   border: 2px solid #000;
-  background-color: var(--bg-container); /* Light background for grid area */
+  background-color: var(--bg-container);
 
-  /* Responsive sizing - FITS AVAILABLE SPACE WITHOUT OVERFLOW */
-  width: 82vmin; /* Use vmin to never exceed viewport */
+  /* Responsive sizing */
+  width: 82vmin;
   height: 82vmin;
 
-  flex-wrap: wrap;
   margin: 0 auto 10px auto;
   touch-action: none;
 }
@@ -786,16 +784,234 @@ button:active,
   gap: 10px;
 }
 
-/* Mobile Portrait: Lower Export Button + Safe Area + Scroll Space */
-@media screen and (max-width: 600px) and (orientation: portrait) {
-  .export-container {
-    /* Sit above the home indicator + 20px margin */
-    bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px));
+/* Layers Panel */
+.layers-panel {
+  position: fixed;
+  top: 60px; /* Below header */
+  right: 20px;
+  width: 250px;
+  background-color: var(--bg-container);
+  border: 2px solid var(--btn-border);
+  box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+  padding: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  border-bottom: 2px solid #000;
+  padding-bottom: 5px;
+  font-size: 24px;
+}
+
+.layers-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.layers-controls button {
+  flex: 1;
+  padding: 5px;
+  height: 40px;
+  font-size: 20px;
+}
+
+/* Delete Layer Button - Keyboard Key Style */
+.delete-btn {
+  background-color: var(--btn-bg); /* Match theme */
+  color: var(--btn-text);
+  border: 2px solid var(--btn-border);
+  border-bottom-width: 4px; /* Keycap depth */
+  border-radius: 6px; /* Slightly rounder like Mac keys */
+  width: 50px; /* Fixed width for icon */
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: none; /* Reset retro shadow */
+  transition: all 0.1s;
+  padding: 0;
+}
+
+.delete-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #333;
+}
+
+.delete-btn:hover {
+  background-color: #ff5555; /* Match Reset Button Red */
+  border-color: #000;
+  transform: translateY(1px);
+  border-bottom-width: 3px;
+}
+
+/* Change icon color to white on hover */
+.delete-btn:hover svg path {
+  fill: white;
+}
+
+.delete-btn:active {
+  transform: translateY(3px);
+  border-bottom-width: 1px;
+  background-color: #cc4444; /* Darker red for active */
+}
+
+/* Layers List Grid */
+.layers-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  max-height: 400px; /* Taller to fit big items */
+  overflow-y: auto;
+  overflow-x: hidden; /* Disable horizontal sliding */
+  border: 1px inset rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  background: var(--bg-container); /* Match theme */
+
+  /* Hide Scrollbars */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.layers-list::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+/* Match .saved-item vibe strictly */
+.layer-item {
+  width: 200px; /* Even bigger center square */
+  height: 200px;
+  border: 2px solid var(--btn-border);
+  background-color: #fff;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* Remove padding for full image */
+  position: relative;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5); /* Retro shadow */
+  transition: transform 0.1s;
+  flex-shrink: 0;
+}
+
+.layer-item:hover {
+  background-color: #fff; /* Keep white */
+  transform: scale(1.05); /* Pop effect like saved items */
+}
+
+.layer-item.active {
+  border: 4px solid #000; /* Bold border for active state */
+  box-shadow: inset 0 0 0 1px #fff; /* Inner contrast */
+}
+
+/* Full size preview inside the square */
+.layer-preview {
+  width: 100%;
+  height: 100%;
+  border: none; /* Border is on the container */
+  box-shadow: none; /* Shadow is on the container */
+  image-rendering: pixelated;
+  object-fit: contain;
+  /* Checkerboard background */
+  background-image: linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 10px 10px;
+  background-position: 0 0, 0 5px, 5px -5px, -5px 0px;
+}
+
+/* Layer Stacking Logic */
+.container {
+  position: relative; /* Context for absolute layers */
+  /* Remove display:flex which was for cells */
+  display: block;
+}
+
+.layer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Grid cells inside layer */
+  pointer-events: none; /* Default: click-through */
+  z-index: 1; /* Configured by JS */
+}
+
+.layer-container .cell {
+  pointer-events: auto; /* Cells always capture if they exist */
+  /* But wait, if top layer cells capture events, they block bottom layer cells even if transparent? 
+     YES. 
+     So inactive layer cells MUST be pointer-events: none UNLESS we want to 'select' them?
+     The requirement is to draw on the *active* layer.
+     So ONLY the active layer's cells should accept pointer events.
+  */
+  pointer-events: none;
+}
+
+.layer-container.active .cell {
+  pointer-events: auto; /* Only active layer captures drawing */
+}
+
+/* Base styles for cells override */
+.cell {
+  /* Ensure transparent background by default */
+  /* background-color handled by JS inline styles, defaults to transparent if not set? */
+  background-color: transparent;
+}
+
+/* Close btn */
+.close-panel-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #000;
+  box-shadow: none;
+  padding: 0;
+  height: auto;
+  width: auto;
+}
+.close-panel-btn:hover {
+  color: red;
+  background: none;
+  transform: scale(1.1);
+  box-shadow: none;
+}
+
+/* Mobile Adjustments for Layers Panel */
+@media screen and (max-width: 600px) {
+  .layers-panel {
+    top: auto;
+    bottom: 0px;
+    right: 0;
+    left: 0;
+    width: 100%;
+    border-width: 2px 0 0 0;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+    padding-bottom: max(20px, env(safe-area-inset-bottom) + 20px);
+    transition: transform 0.3s ease;
+    transform: translateY(100%);
   }
 
-  .content-wrapper {
-    /* Ensure content scroll clears the floating button */
-    padding-bottom: 120px;
+  .layers-panel.active {
+    transform: translateY(0);
+    display: flex !important; /* Force flex when active */
+  }
+
+  /* Override the 'hidden' class logic if using specific class toggles */
+  .layers-panel.hidden {
+    display: none;
   }
 }
 
@@ -981,29 +1197,27 @@ button:active,
   }
 }
 
-#openSavedBtn svg {
-  pointer-events: none; /* Ensure clicks pass to button */
-}
-
+/* Floating Buttons (Export, Saved) */
 .floating-btn {
+  width: 60px;
+  height: 60px;
+  border-radius: 0;
   background-color: var(--btn-bg);
   color: var(--btn-text);
   border: 2px solid var(--btn-border);
-  width: 60px;
-  height: 60px;
-  padding: 0;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1); /* Standardized Shadow (was 6px) */
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
+  z-index: 100;
 }
 
 .floating-btn:hover {
   background-color: var(--btn-hover);
-  transform: translate(-2px, -2px);
-  box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
+  transform: translate(-1px, -1px);
+  box-shadow: 5px 5px 0px rgba(0, 0, 0, 1);
 }
 
 .floating-btn:active {
@@ -1011,6 +1225,19 @@ button:active,
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
   background-color: var(--btn-active-bg);
   color: var(--btn-active-text);
+}
+
+/* Specific Positioning for Saved Button (matches previous inline) */
+#openSavedBtn {
+  position: fixed;
+  bottom: max(20px, env(safe-area-inset-bottom) + 20px);
+  left: 20px;
+  z-index: 9999;
+  /* Display is handled by media queries (hidden by default) */
+}
+
+#openSavedBtn svg {
+  pointer-events: none; /* Ensure clicks pass to button */
 }
 
 .export-menu {
@@ -1146,4 +1373,69 @@ input[type="number"]::-webkit-outer-spin-button {
 }
 input[type="number"] {
   -moz-appearance: textfield;
+}
+/* Mobile Layer Panel - Bottom Sheet */
+@media screen and (max-width: 600px) {
+  .layers-panel {
+    top: auto; /* Unset top */
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    right: 0;
+    border-radius: 20px 20px 0 0; /* Sheet vibe */
+    border-bottom: none;
+    padding-bottom: max(
+      20px,
+      env(safe-area-inset-bottom) + 10px
+    ); /* Safe area */
+
+    /* Animation (optional) */
+    transform: translateY(100%);
+    transition: transform 0.3s ease-out;
+  }
+
+  .layers-panel.active {
+    transform: translateY(0);
+  }
+
+  .layers-list {
+    flex-direction: row; /* Horizontal strip */
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
+    max-height: auto;
+    height: auto;
+    justify-content: flex-start; /* Align left */
+    padding: 10px;
+    gap: 15px;
+  }
+
+  .layer-item {
+    width: 100px; /* Smaller on mobile */
+    height: 100px;
+    flex-shrink: 0;
+  }
+
+  /* Adjust controls to fit better */
+  .layers-controls button {
+    height: 44px; /* Touch target */
+  }
+
+  /* Mobile Export Button - Bottom Right (Low Right) */
+  .export-container {
+    top: auto;
+    bottom: max(20px, env(safe-area-inset-bottom) + 20px); /* Bottom aligned */
+    right: 20px; /* Low Right */
+    align-items: flex-end;
+  }
+
+  /* Reset order so menu is ABOVE button (default HTML structure is Menu then Button) */
+  #exportMainBtn {
+    order: 0;
+  }
+  .export-menu {
+    order: 0;
+    margin-top: 0;
+    margin-bottom: 10px; /* Space between menu and button */
+  }
 }

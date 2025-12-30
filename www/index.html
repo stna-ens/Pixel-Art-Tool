@@ -70,6 +70,7 @@
       <div class="game-area">
         <div id="drawingBoard" class="drawing-board">
           <div class="tools" id="tools">
+            <button id="layersBtn">Layers</button>
             <button id="themeBtn">Theme</button>
             <button id="eraserBtn">Eraser</button>
             <button id="changeGridNumber">Cell Count</button>
@@ -127,6 +128,39 @@
       <button class="close-modal-btn" onclick="toggleCellCountPanel()">
         CANCEL
       </button>
+    </div>
+
+    <!-- Layers Panel (Sidebar/Modal) -->
+    <div id="layersPanel" class="layers-panel hidden">
+      <div class="panel-header">
+        <span>LAYERS</span>
+        <button id="closeLayersBtn" class="close-panel-btn">X</button>
+      </div>
+      <div class="layers-controls">
+        <button id="addLayerBtn" title="Add Layer">+</button>
+        <button id="moveLayerUpBtn" title="Move Up">^</button>
+        <button id="moveLayerDownBtn" title="Move Down">v</button>
+        <button id="deleteLayerBtn" title="Delete Layer" class="delete-btn">
+          <!-- Pixelated Backspace Icon -->
+          <svg
+            viewBox="0 0 20 20"
+            shape-rendering="crispEdges"
+            style="width: 24px; height: 24px"
+          >
+            <path
+              fill="var(--btn-text)"
+              d="
+              M6,3 h12 v14 h-12 v-2 h-2 v-2 h-2 v-6 h2 v-2 h2 v-2 z
+              M7,5 v10 h10 v-10 h-10 z
+              M9,7 h2 v2 h2 v-2 h2 v2 h-2 v2 h2 v2 h-2 v-2 h-2 v2 h-2 v-2 h2 v-2 h-2 v-2 z
+            "
+            />
+          </svg>
+        </button>
+      </div>
+      <div id="layersList" class="layers-list">
+        <!-- JS will populate: <div class="layer-item active">Layer 1</div> -->
+      </div>
     </div>
 
     <!-- Theme Modal -->
@@ -214,23 +248,7 @@
     </div>
 
     <!-- Floating Saved Projects Button (Matched to Export Button) -->
-    <button
-      id="openSavedBtn"
-      title="Saved Projects"
-      style="
-        position: fixed !important;
-        bottom: max(20px, calc(env(safe-area-inset-bottom) + 20px)) !important;
-        left: 20px !important;
-        z-index: 9999 !important;
-        width: 60px;
-        height: 60px;
-        align-items: center;
-        justify-content: center;
-        background-color: var(--btn-bg);
-        border: 2px solid #000;
-        box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
-      "
-    >
+    <button id="openSavedBtn" title="Saved Projects" class="floating-btn">
       <svg
         viewBox="0 0 24 24"
         width="32"
