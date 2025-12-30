@@ -1,5 +1,12 @@
 {
+  "name": "Pixy - Pixel Art Tool",
+  "short_name": "Pixy",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "scope": ".",
+  "theme_color": "#ffdad5",
   "background_color": "#ffdad5",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icons/icon-48.webp",
