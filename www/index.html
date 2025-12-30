@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css?v=1.0.1" />
   </head>
   <body>
     <div class="content-wrapper">
@@ -237,6 +237,19 @@
       </svg>
     </button>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=1.0.1"></script>
+    <script>
+      // Force unregister any legacy service workers
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .getRegistrations()
+          .then(function (registrations) {
+            for (let registration of registrations) {
+              registration.unregister();
+              console.log("Service Worker unregistered");
+            }
+          });
+      }
+    </script>
   </body>
 </html>
