@@ -194,7 +194,8 @@ button:active,
 
 #saveDraftBtn {
   position: absolute;
-  right: 10px;
+  /* Safe area aware right margin */
+  right: max(10px, env(safe-area-inset-right) + 10px);
   top: 15px;
   height: 44px;
   padding: 0 15px;
@@ -542,7 +543,10 @@ button:active,
   /* Absolute Sidebar to keep Grid centered strictly */
   .saved-sidebar {
     position: absolute;
-    right: 30px; /* Margined from screen border */
+    right: max(
+      30px,
+      env(safe-area-inset-right) + 30px
+    ); /* Respect Notch/Dynamic Island */
     top: 50%;
     transform: translateY(-50%); /* Center Vertically */
 
@@ -557,7 +561,7 @@ button:active,
 
     background: var(--bg-container);
     margin: 0;
-    z-index: 30;
+    z-index: 500; /* Ensure on top of everything */
 
     /* Enhance floating look */
     border-radius: 0;
@@ -774,8 +778,8 @@ button:active,
 .export-container {
   position: fixed;
   bottom: 130px; /* Raised to avoid Saved Sidebar */
-  right: 20px;
-  z-index: 100;
+  right: max(20px, env(safe-area-inset-right) + 20px);
+  z-index: 550; /* Above sidebar */
   display: flex;
   flex-direction: column;
   align-items: flex-end;
