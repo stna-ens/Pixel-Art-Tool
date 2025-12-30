@@ -59,7 +59,13 @@ function initApp() {
     const errDiv = document.createElement("div");
     errDiv.style.cssText =
       "position:fixed;top:0;left:0;right:0;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-size:14px;font-family:monospace;pointer-events:none;white-space:pre-wrap;";
-    errDiv.innerText = "Error: " + msg + "\nLine: " + lineno;
+    errDiv.innerText =
+      "Error: " +
+      msg +
+      "\nFile: " +
+      source.split("/").pop() +
+      "\nLine: " +
+      lineno;
     document.body.appendChild(errDiv);
   };
 
@@ -980,19 +986,30 @@ const customInputs = {
 
 // Load Custom Themes
 function loadCustomThemes() {
-  const custom = localStorage.getItem("customThemes");
-  if (custom) {
-    try {
-      customThemes = JSON.parse(custom);
-    } catch (e) {
-      console.error("Error loading custom themes", e);
-      customThemes = {};
+  try {
+    const custom = localStorage.getItem("customThemes");
+    if (custom) {
+      try {
+        customThemes = JSON.parse(custom);
+      } catch (e) {
+        console.error("Error parsing custom themes", e);
+        customThemes = {};
+      }
     }
+  } catch (e) {
+    console.warn("Storage access denied (loadCustomThemes)", e);
+    customThemes = {};
   }
 }
 
 function saveCustomThemesToStorage() {
-  localStorage.setItem("customThemes", JSON.stringify(customThemes));
+  try {
+    localStorage.setItem("customThemes", JSON.stringify(customThemes));
+  } catch (e) {
+    console.warn("Storage access denied (saveCustomThemes)", e);
+    // Optional: Alert user only if they are explicitly trying to save?
+    // For auto-save operations, maybe silent is better or a concise toast.
+  }
 }
 
 function deleteTheme(e, id) {
@@ -1004,7 +1021,11 @@ function deleteTheme(e, id) {
     if (activeThemeId === id) {
       applyTheme(defaultThemes.poolsuite.colors);
       activeThemeId = "poolsuite";
-      localStorage.setItem("pixelArtThemeId", activeThemeId);
+      try {
+        localStorage.setItem("pixelArtThemeId", activeThemeId);
+      } catch (e) {
+        console.warn("Storage access denied", e);
+      }
     }
     renderThemeOptions();
   }
@@ -1072,7 +1093,11 @@ function createThemeCard(theme, isCustom) {
   themeCard.onclick = () => {
     applyTheme(theme.colors);
     activeThemeId = theme.id;
-    localStorage.setItem("pixelArtThemeId", activeThemeId);
+    try {
+      localStorage.setItem("pixelArtThemeId", activeThemeId);
+    } catch (e) {
+      console.warn("Storage access denied", e);
+    }
 
     document
       .querySelectorAll(".theme-card")
@@ -1128,7 +1153,12 @@ function renderThemeOptions() {
 loadCustomThemes();
 
 // 2. Determine Active Theme
-const savedThemeId = localStorage.getItem("pixelArtThemeId");
+let savedThemeId = "poolsuite";
+try {
+  savedThemeId = localStorage.getItem("pixelArtThemeId");
+} catch (e) {
+  console.warn("Storage access denied (init)", e);
+}
 activeThemeId = savedThemeId || "poolsuite";
 
 let initialColors = defaultThemes.poolsuite.colors;
@@ -1221,7 +1251,12 @@ saveCustomBtn.onclick = () => {
   // Apply immediately
   applyTheme(customTheme.colors);
   activeThemeId = id;
-  localStorage.setItem("pixelArtThemeId", id);
+  try {
+    localStorage.setItem("pixelArtThemeId", id);
+  } catch (e) {
+    console.warn("Storage access denied", e);
+    alert("Theme created but could not be persisted to storage.");
+  }
 
   themeModal.classList.remove("show");
 
@@ -1440,9 +1475,20 @@ async function copyToClipboard(base64Data) {
       alert("Sticker copied! Paste it anywhere.");
     } else {
       try {
+        // Secure Context Check
+        if (!window.isSecureContext && window.location.protocol !== "dapp:") {
+          if (
+            location.hostname !== "localhost" &&
+            location.hostname !== "127.0.0.1"
+          ) {
+            throw new Error("Clipboard API requires HTTPS");
+          }
+        }
+
         const blob = await (await fetch(base64Data)).blob();
+
         // Check if Clipboard Item API is supported (Safari requires it)
-        if (typeof ClipboardItem !== "undefined") {
+        if (typeof ClipboardItem !== "undefined" && navigator.clipboard) {
           await navigator.clipboard.write([
             new ClipboardItem({
               [blob.type]: blob,
@@ -1451,12 +1497,12 @@ async function copyToClipboard(base64Data) {
           alert("Sticker copied to clipboard!");
         } else {
           // Fallback for older browsers or non-secure context
-          alert("Clipboard API not supported in this context.");
+          throw new Error("Clipboard API not available");
         }
       } catch (err) {
         console.error("Clipboard API failed", err);
         alert(
-          "Could not copy to clipboard. Ensure you are on a secure (HTTPS) context."
+          "Could not copy to clipboard. This feature requires a secure (HTTPS) connection."
         );
       }
     }
@@ -1512,6 +1558,7 @@ async function shareFile(blob, filename) {
 
 async function webShareFallback(blob, filename) {
   if (
+    window.isSecureContext &&
     navigator.canShare &&
     navigator.canShare({
       files: [new File([blob], filename, { type: "image/png" })],
@@ -1608,18 +1655,23 @@ function saveDraft() {
     thumbnail,
   };
 
-  const saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
-  saves.unshift(save);
-  // Limit saves to 20
-  if (saves.length > 20) saves.pop();
-  localStorage.setItem("pixy_saves", JSON.stringify(saves));
+  try {
+    const saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+    saves.unshift(save);
+    // Limit saves to 20
+    if (saves.length > 20) saves.pop();
+    localStorage.setItem("pixy_saves", JSON.stringify(saves));
 
-  renderSavedDrawings();
+    renderSavedDrawings();
 
-  // Visual Feedback
-  const originalText = saveDraftBtn.textContent;
-  saveDraftBtn.textContent = "Saved!";
-  setTimeout(() => (saveDraftBtn.textContent = originalText), 1000);
+    // Visual Feedback
+    const originalText = saveDraftBtn.textContent;
+    saveDraftBtn.textContent = "Saved!";
+    setTimeout(() => (saveDraftBtn.textContent = originalText), 1000);
+  } catch (e) {
+    console.warn("Storage error", e);
+    alert("Could not save to local storage. Check browser privacy settings.");
+  }
 }
 
 function renderSavedDrawings() {
@@ -1703,14 +1755,18 @@ function populateList(container, saves) {
 
 function deleteSave(id) {
   if (!confirm("Delete this saved drawing?")) return;
-  let saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
-  saves = saves.filter((s) => s.id !== id);
-  localStorage.setItem("pixy_saves", JSON.stringify(saves));
+  try {
+    let saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+    saves = saves.filter((s) => s.id !== id);
+    localStorage.setItem("pixy_saves", JSON.stringify(saves));
 
-  // If no saves left, exit edit mode
-  if (saves.length === 0) toggleEditMode(false);
+    // If no saves left, exit edit mode
+    if (saves.length === 0) toggleEditMode(false);
 
-  renderSavedDrawings();
+    renderSavedDrawings();
+  } catch (e) {
+    console.warn("Delete save error", e);
+  }
 }
 
 function loadDraft(save) {
