@@ -203,8 +203,10 @@ function addToCurrentStroke(
 function undo() {
   if (historyStack.length === 0) return;
   const lastStroke = historyStack.pop();
-  // Revert each cell in the stroke
-  lastStroke.forEach((item) => {
+  // Revert each cell in the stroke IN REVERSE ORDER
+  // This ensures if a cell was changed multiple times in one stroke,
+  // we revert to the absolute oldest state first, effectively rewinding time correctly.
+  lastStroke.reverse().forEach((item) => {
     item.element.style.backgroundColor = item.prevColor || "var(--bg-cell)";
     item.element.dataset.percent = item.prevPercent || 0;
   });
