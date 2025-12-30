@@ -284,16 +284,8 @@ function createGrid(gridNumber) {
       container.appendChild(cell);
       cell.dataset.percent = "0"; // Initialize percent state
       cell.style.backgroundColor = "var(--bg-cell)";
-      // DIRECT LISTENERS FOR RELIABLE DRAWING
-      cell.addEventListener("pointerdown", (e) => {
-        e.preventDefault();
-        isDrawing = true;
-        currentStroke = [];
-        changeColor(cell);
-      });
-      cell.addEventListener("pointerenter", () => {
-        if (isDrawing) changeColor(cell);
-      });
+      cell.dataset.percent = "0"; // Initialize percent state
+      cell.style.backgroundColor = "var(--bg-cell)";
     }
   }
 }
