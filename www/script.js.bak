@@ -654,7 +654,6 @@ const savedList = document.getElementById("savedList"); // Moved here to fix ini
 function toggleSavedModal() {
   savedProjectsModal.classList.toggle("active");
   if (savedProjectsModal.classList.contains("active")) {
-    toggleEditMode(false); // Ensure we start fresh
     renderSavedDrawings(); // Refresh when opening
   }
 }
@@ -1893,71 +1892,54 @@ function toggleEditMode(active) {
 }
 
 function saveDraft() {
-  const gridNumber = window.currentGridNumber || 16;
+  const cells = document.querySelectorAll(".cell");
+  if (cells.length === 0) return;
+  const gridCount = Math.sqrt(cells.length);
 
-  // Serialize all layers
-  // Serialize all layers
-  const savedLayers = layers.map((layer) => {
-    // Map all cells for that layer.
-    const cells = layer.div.querySelectorAll(".cell");
-    const layerCells = [];
-    cells.forEach((c) => {
-      layerCells.push({
-        color: c.style.backgroundColor,
-        percent: c.dataset.percent || "0",
-      });
+  const cellData = [];
+  cells.forEach((cell) => {
+    cellData.push({
+      color: cell.style.backgroundColor,
+      percent: cell.dataset.percent || "0",
     });
-
-    return {
-      name: layer.name,
-      data: layerCells,
-    };
   });
 
-  // Generate Thumbnail (Composite)
+  // Generate Thumbnail
   const canvas = document.createElement("canvas");
   canvas.width = 100;
   canvas.height = 100;
   const ctx = canvas.getContext("2d");
-  const cellSize = 100 / gridNumber;
+  const cellSize = 100 / gridCount;
 
-  // We need to render layers bottom-up
-  layers.forEach((layer) => {
-    const cells = layer.div.querySelectorAll(".cell");
-    cells.forEach((cell, i) => {
-      const p = cell.dataset.percent || "0";
-      // bg check
-      const bg = cell.style.backgroundColor;
-      if (
-        p !== "0" ||
-        (bg && bg !== "transparent" && bg !== "rgba(0, 0, 0, 0)")
-      ) {
-        const r = Math.floor(i / gridNumber);
-        const c = i % gridNumber;
-        ctx.fillStyle = bg;
-        ctx.fillRect(c * cellSize, r * cellSize, cellSize + 1, cellSize + 1);
-      }
-    });
+  cells.forEach((cell, i) => {
+    const r = Math.floor(i / gridCount);
+    const c = i % gridCount;
+    const p = cell.dataset.percent || "0";
+    if (p !== "0") {
+      ctx.fillStyle = cell.style.backgroundColor;
+      ctx.fillRect(c * cellSize, r * cellSize, cellSize + 1, cellSize + 1);
+    }
   });
 
   const thumbnail = canvas.toDataURL();
 
   const save = {
     id: Date.now(),
-    version: 2,
-    gridCount: gridNumber,
-    layers: savedLayers,
+    gridCount,
+    data: cellData,
     thumbnail,
   };
 
   try {
     const saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
     saves.unshift(save);
+    // Limit saves to 20
     if (saves.length > 20) saves.pop();
     localStorage.setItem("pixy_saves", JSON.stringify(saves));
 
     renderSavedDrawings();
 
+    // Visual Feedback
     const originalText = saveDraftBtn.textContent;
     saveDraftBtn.textContent = "Saved!";
     setTimeout(() => (saveDraftBtn.textContent = originalText), 1000);
@@ -2007,25 +1989,16 @@ function populateList(container, saves) {
     img.draggable = false;
 
     // Click: Load if normal
-    // Click: Load if normal
     div.onclick = () => {
-      // Ensure timer is cleared immediately
-      if (pressTimer) clearTimeout(pressTimer);
-
       if (!isEditMode) {
-        try {
-          loadDraft(save);
-          // If in modal, close it
-          if (
-            document
-              .getElementById("savedProjectsModal")
-              .classList.contains("active")
-          ) {
-            toggleSavedModal();
-          }
-        } catch (e) {
-          console.error("Click handler error", e);
-          alert("Error opening project: " + e.message);
+        loadDraft(save);
+        // If in modal, close it
+        if (
+          document
+            .getElementById("savedProjectsModal")
+            .classList.contains("active")
+        ) {
+          toggleSavedModal();
         }
       }
     };
@@ -2037,9 +2010,7 @@ function populateList(container, saves) {
         toggleEditMode(true);
       }, 600);
     };
-    const cancelPress = () => {
-      if (pressTimer) clearTimeout(pressTimer);
-    };
+    const cancelPress = () => clearTimeout(pressTimer);
 
     div.addEventListener("pointerdown", startPress);
     div.addEventListener("pointerup", cancelPress);
@@ -2074,78 +2045,19 @@ function deleteSave(id) {
 }
 
 function loadDraft(save) {
-  try {
-    // Confirm check removed to prevent blocking state issues on mobile
-    // if (
-    //   document.querySelectorAll(".cell[data-percent]:not([data-percent='0'])")
-    //     .length > 0 &&
-    //   !confirm("Load saved drawing? Unsaved changes will be lost.")
-    // ) {
-    //   return;
-    // }
-
-    // V2: Multi-layer support
-    if (save.version === 2 && save.layers) {
-      createGrid(save.gridCount);
-
-      const savedLayers = save.layers;
-
-      // Restore Layer 1
-      if (savedLayers.length > 0) {
-        if (!layers[0]) {
-          throw new Error("Grid creation failed: Layer 0 missing");
-        }
-        const l1 = layers[0];
-        const l1Cells = l1.div.querySelectorAll(".cell");
-        const l1Data = savedLayers[0].data;
-
-        l1Data.forEach((d, i) => {
-          if (l1Cells[i]) {
-            l1Cells[i].style.backgroundColor = d.color;
-            l1Cells[i].dataset.percent = d.percent;
-          }
-        });
-        updateLayerPreview(0);
-      }
-
-      // Restore subsequent layers
-      for (let i = 1; i < savedLayers.length; i++) {
-        addLayer(); // Adds to end, becomes active
-        const newLayerIndex = layers.length - 1;
-        const newLayer = layers[newLayerIndex];
-        const layerData = savedLayers[i].data;
-        const layerCells = newLayer.div.querySelectorAll(".cell");
-
-        layerData.forEach((d, cellIdx) => {
-          if (layerCells[cellIdx]) {
-            layerCells[cellIdx].style.backgroundColor = d.color;
-            layerCells[cellIdx].dataset.percent = d.percent;
-          }
-        });
-        updateLayerPreview(newLayerIndex);
-      }
-    } else {
-      // Legacy V1 (Single Layer)
-      if (!save.data) {
-        throw new Error("Legacy save file corrupt: Missing data field");
-      }
-
-      createGrid(save.gridCount);
-      const l1 = layers[0];
-      if (!l1) throw new Error("Grid creation failed");
-
-      const l1Cells = l1.div.querySelectorAll(".cell");
-
-      save.data.forEach((d, i) => {
-        if (l1Cells[i]) {
-          l1Cells[i].style.backgroundColor = d.color;
-          l1Cells[i].dataset.percent = d.percent;
-        }
-      });
-      updateLayerPreview(0);
-    }
-  } catch (err) {
-    console.error("Failed to load draft:", err);
-    alert("Error loading project: " + err.message);
+  if (
+    document.querySelectorAll(".cell[data-percent]:not([data-percent='0'])")
+      .length > 0 &&
+    !confirm("Load saved drawing? Unsaved changes will be lost.")
+  ) {
+    return;
   }
+  createGrid(save.gridCount);
+  const cells = document.querySelectorAll(".cell");
+  save.data.forEach((d, i) => {
+    if (cells[i]) {
+      cells[i].style.backgroundColor = d.color;
+      cells[i].dataset.percent = d.percent;
+    }
+  });
 }
