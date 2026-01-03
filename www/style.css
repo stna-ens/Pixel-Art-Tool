@@ -446,6 +446,7 @@ button:active,
   justify-content: center;
   width: 100%;
   position: relative;
+  overflow: visible; /* CRITICAL: Allow switch to hang off the side */
 }
 
 /* Saved Sidebar - Base (Portrait) */
@@ -794,7 +795,7 @@ button:active,
 /* Export Floating Button */
 .export-container {
   position: fixed;
-  bottom: 130px; /* Raised to avoid Saved Sidebar */
+  bottom: 30px; /* Low right corner */
   right: max(20px, env(safe-area-inset-right) + 20px);
   z-index: 550; /* Above sidebar */
   display: flex;
@@ -1456,5 +1457,61 @@ input[type="number"] {
     order: 0;
     margin-top: 0;
     margin-bottom: 10px; /* Space between menu and button */
+  }
+}
+
+/* Retro Vertical Toggle Switch */
+.drawing-board {
+  position: relative; /* Ensure absolute positioning works inside */
+}
+
+.draw-mode-switch.vertical-retro {
+  position: absolute;
+  /* Align with TOP of Grid: Center (50%) - Half Height (40vmin) */
+  top: calc(50% - 40vmin);
+  /* Position to RIGHT of Grid: Center (50%) + Half Width (40vmin) + Gap (20px) */
+  left: calc(50% + 40vmin + 20px);
+  right: auto; /* Clear right prop */
+
+  display: flex;
+  flex-direction: column;
+  border: 2px solid var(--btn-border);
+  background-color: var(--btn-bg);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  z-index: 100;
+  width: 70px;
+}
+
+.mode-option {
+  padding: 8px 0;
+  text-align: center;
+  font-family: "VT323", monospace;
+  font-size: 18px;
+  cursor: pointer;
+  color: var(--btn-text);
+  background-color: var(--btn-bg);
+  transition: all 0.1s;
+  user-select: none;
+}
+
+.mode-option:first-child {
+  border-bottom: 2px solid var(--btn-border);
+}
+
+.mode-option.active {
+  background-color: var(--btn-active-bg);
+  color: var(--btn-active-text);
+}
+
+.mode-option:hover:not(.active) {
+  background-color: var(--btn-hover);
+}
+
+/* Mobile adjustments if needed */
+@media (max-width: 768px) {
+  .draw-mode-switch.vertical-retro {
+    right: 10px;
+    top: 10px;
+    width: 60px;
   }
 }

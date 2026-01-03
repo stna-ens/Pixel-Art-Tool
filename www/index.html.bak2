@@ -22,7 +22,7 @@
       href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=2.2" />
+    <link rel="stylesheet" href="style.css?v=2.0" />
   </head>
   <body>
     <script>
@@ -71,25 +71,11 @@
       </div>
       <div class="game-area">
         <div id="drawingBoard" class="drawing-board">
-          <!-- Drawing Mode Toggle Switch -->
-          <!-- Drawing Mode Toggle Switch (Vertical/Blocky) -->
-          <div class="draw-mode-switch vertical-retro" id="drawModeSwitch">
-            <div
-              class="mode-option active"
-              data-mode="progressive"
-              title="Progressive Mode"
-            >
-              PROG
-            </div>
-            <div class="mode-option" data-mode="instant" title="Instant Mode">
-              INST
-            </div>
-          </div>
           <div class="tools" id="tools">
             <button id="layersBtn">Layers</button>
             <button id="themeBtn">Theme</button>
             <button id="eraserBtn">Eraser</button>
-
+            <button id="drawModeBtn" title="Toggle drawing mode">Progressive</button>
             <button id="changeGridNumber">Cell Count</button>
             <button id="resetBtn">Reset</button>
             <input type="color" id="colorPicker" value="#ffffff" />

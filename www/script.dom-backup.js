@@ -8,9 +8,6 @@ let historyStack = [];
 let currentStroke = []; // Buffer for the current continuous stroke
 const MAX_HISTORY = 50;
 
-// Drawing mode: 'progressive' or 'instant'
-let drawingMode = "progressive"; // Default to progressive opacity
-
 // Cached base colors for color mixing (set by applyTheme)
 let cachedBaseColors = { r: 255, g: 255, b: 255 };
 
@@ -255,56 +252,43 @@ function changeColor(target) {
     }
 
     let currentPercent = Number(target.dataset.percent || 0);
-    let newColor, newPercent;
 
-    if (drawingMode === "instant") {
-      // INSTANT MODE: Full opacity immediately
-      newPercent = 100;
-      newColor = currentColor;
+    if (currentPercent < 100) {
+      currentPercent += 10;
 
-      target.dataset.percent = newPercent;
+      // Calculate new color DYNAMICALLY
+      const baseColors = getBaseColors();
+      const baseR_val = baseColors.r != null ? baseColors.r : 255;
+      const baseG_val = baseColors.g != null ? baseColors.g : 255;
+      const baseB_val = baseColors.b != null ? baseColors.b : 255;
+
+      let targetR = 0,
+        targetG = 0,
+        targetB = 0;
+
+      // Use CACHED color (Performance critical)
+      targetR = cachedCurrentColorRGB.r;
+      targetG = cachedCurrentColorRGB.g;
+      targetB = cachedCurrentColorRGB.b;
+
+      // Safe mixing logic (prevent NaN but allow floats)
+      const mix = currentPercent / 100;
+      const mixedR = Math.round(baseR_val + (targetR - baseR_val) * mix) || 0;
+      const mixedG = Math.round(baseG_val + (targetG - baseG_val) * mix) || 0;
+      const mixedB = Math.round(baseB_val + (targetB - baseB_val) * mix) || 0;
+
+      const newColor = `rgb(${mixedR}, ${mixedG}, ${mixedB})`;
+
+      target.dataset.percent = currentPercent;
       target.style.backgroundColor = newColor;
 
-      addToCurrentStroke(target, prevColor, prevPercent, newColor, newPercent);
-    } else {
-      // PROGRESSIVE MODE: 10% opacity increments with color mixing
-      if (currentPercent < 100) {
-        currentPercent += 10;
-
-        // Calculate new color DYNAMICALLY
-        const baseColors = getBaseColors();
-        const baseR_val = baseColors.r != null ? baseColors.r : 255;
-        const baseG_val = baseColors.g != null ? baseColors.g : 255;
-        const baseB_val = baseColors.b != null ? baseColors.b : 255;
-
-        let targetR = 0,
-          targetG = 0,
-          targetB = 0;
-
-        // Use CACHED color (Performance critical)
-        targetR = cachedCurrentColorRGB.r;
-        targetG = cachedCurrentColorRGB.g;
-        targetB = cachedCurrentColorRGB.b;
-
-        // Safe mixing logic (prevent NaN but allow floats)
-        const mix = currentPercent / 100;
-        const mixedR = Math.round(baseR_val + (targetR - baseR_val) * mix) || 0;
-        const mixedG = Math.round(baseG_val + (targetG - baseG_val) * mix) || 0;
-        const mixedB = Math.round(baseB_val + (targetB - baseB_val) * mix) || 0;
-
-        newColor = `rgb(${mixedR}, ${mixedG}, ${mixedB})`;
-
-        target.dataset.percent = currentPercent;
-        target.style.backgroundColor = newColor;
-
-        addToCurrentStroke(
-          target,
-          prevColor,
-          prevPercent,
-          newColor,
-          currentPercent
-        );
-      }
+      addToCurrentStroke(
+        target,
+        prevColor,
+        prevPercent,
+        newColor,
+        currentPercent
+      );
     }
   } catch (err) {
     console.warn("Drawing error (graceful):", err);
@@ -2164,38 +2148,4 @@ function loadDraft(save) {
     console.error("Failed to load draft:", err);
     alert("Error loading project: " + err.message);
   }
-}
-
-// Drawing Mode Toggle Switch (Vertical Retro)
-const drawModeSwitch = document.getElementById("drawModeSwitch");
-
-if (drawModeSwitch) {
-  const options = drawModeSwitch.querySelectorAll(".mode-option");
-
-  options.forEach((option) => {
-    option.onclick = () => {
-      const selectedMode = option.dataset.mode;
-
-      // Update global state
-      drawingMode = selectedMode;
-
-      // Update UI
-      options.forEach((opt) => opt.classList.remove("active"));
-      option.classList.add("active");
-
-      // Feedback
-      if (navigator.vibrate) navigator.vibrate(10);
-    };
-  });
-}
-
-// Drawing Mode Toggle Switch
-const drawModeBtn = document.getElementById("drawModeBtn");
-if (drawModeBtn) {
-  drawModeBtn.onclick = () => {
-    drawingMode = drawingMode === "progressive" ? "instant" : "progressive";
-    drawModeBtn.textContent =
-      drawingMode === "progressive" ? "Progressive" : "Instant";
-    if (navigator.vibrate) navigator.vibrate(10);
-  };
 }
