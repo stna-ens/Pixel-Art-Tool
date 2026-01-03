@@ -1516,8 +1516,34 @@ input[type="number"] {
 /* Mobile adjustments if needed */
 @media (max-width: 768px) {
   .draw-mode-switch.vertical-retro {
-    right: 10px;
-    top: 10px;
-    width: 60px;
+    /* Reset positioning */
+    right: auto;
+    /* Align with Grid Left Edge: Center (50%) - Half Grid Width (41vmin) */
+    left: calc(50% - 41vmin);
+    /* Position above the grid */
+    top: 100px;
+
+    /* Horizontal layout */
+    flex-direction: row;
+    width: auto;
+    height: 28px; /* Smaller Height */
+  }
+
+  .mode-option {
+    width: auto;
+    padding: 0 10px; /* Smaller Padding */
+    height: 28px; /* Match Container */
+    font-size: 14px; /* Smaller Font */
+    border-bottom: none !important;
+  }
+
+  .mode-option:first-child {
+    border-bottom: none;
+    border-right: 2px solid var(--btn-border);
+  }
+
+  /* Add margin to container to prevent overlap */
+  .container {
+    margin-top: 60px;
   }
 }
