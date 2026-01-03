@@ -369,7 +369,7 @@ button:active,
   gap: 15px;
   align-items: center;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 25px;
   width: 100%;
   flex-wrap: wrap; /* allow wrapping on small screens */
 }
@@ -544,9 +544,9 @@ button:active,
   /* Tools positioning relative to drawing-board */
   .tools {
     position: absolute;
-    /* Calculated placement: 50% (Center) + 40vmin (Half Grid) + 20px (Gap) */
+    /* Calculated placement: 50% (Center) + 41.5vmin (Half Grid) + 25px (Gap) */
     /* This puts the tools to the LEFT of the centered grid */
-    right: calc(50% + 40vmin + 20px);
+    right: calc(50% + 41.5vmin + 25px);
     left: auto; /* Unset the previous left pinning */
     top: 50%;
     transform: translateY(-50%); /* Vertical Center */
@@ -1141,10 +1141,10 @@ button:active,
     top: 50%;
     transform: translateY(-50%);
     /* Position: Next to the Centered Grid */
-    /* Grid Left Edge ~= 50% - 40vmin */
+    /* Grid Left Edge ~= 50% - 41.5vmin */
     /* Place Panel 15px to left of Grid */
     left: auto;
-    right: calc(50% + 40vmin + 15px);
+    right: calc(50% + 41.5vmin + 15px);
     width: 100px; /* Slimmer */
     height: auto;
     max-width: none;
@@ -1206,15 +1206,15 @@ button:active,
   /* TOOLS Animation - The "Push" Effect */
   .tools {
     transition: right 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    /* Default pos: 20px from Grid */
-    right: calc(50% + 40vmin + 20px);
+    /* Default pos: now 41.5vmin + 25px */
+    right: calc(50% + 41.5vmin + 25px);
     z-index: 90;
   }
 
   /* When Panel is OPEN, move Tools further left */
   body.cell-panel-open .tools {
-    /* Move left by Panel Width (100px) + Gap (15px) */
-    right: calc(50% + 40vmin + 20px + 100px + 15px);
+    /* Move left by Panel Width (100px) + Gap (15px) + Tool Gap Diff? No just stack */
+    right: calc(50% + 41.5vmin + 25px + 100px + 20px);
   }
 }
 
@@ -1555,6 +1555,11 @@ input[type="number"] {
   .mode-option:first-child {
     /* Divider between buttons */
     border-right: 2px solid var(--btn-border);
+  }
+
+  /* Restore smaller gap for mobile tools */
+  .tools {
+    margin-top: 20px;
   }
 
   /* Reduce gap between header and grid */

@@ -106,7 +106,19 @@ function initApp() {
 // 1. Pointer Down (Start Drawing) - Moved to function
 function attachContainerListeners() {
   container.addEventListener("pointerdown", (e) => {
-    // Only left click or touch
+    // AUTOMATIC PALM REJECTION
+    // 1. Detect if the user is using a stylus (Apple Pencil)
+    if (e.pointerType === "pen") {
+      window.hasDetectedStylus = true;
+    }
+
+    // 2. If we have detected a stylus previously, IGNORE all non-pen inputs (like palm touches)
+    //    This creates a strict "Pen Mode" once the pen is used.
+    if (window.hasDetectedStylus && e.pointerType !== "pen") {
+      return;
+    }
+
+    // Only left click or touch (if not using stylus mode logic)
     if (e.button !== 0 && e.pointerType === "mouse") return;
 
     e.preventDefault(); // Prevent scroll/drag
@@ -119,6 +131,9 @@ function attachContainerListeners() {
 
   // 2. Pointer Move (Draw Stroke)
   container.addEventListener("pointermove", (e) => {
+    // Palm Rejection: Ignore non-pen moves if stylus mode is active
+    if (window.hasDetectedStylus && e.pointerType !== "pen") return;
+
     if (isDrawing) {
       e.preventDefault();
       handlePointerDraw(e);
@@ -127,9 +142,15 @@ function attachContainerListeners() {
 
   // 3. Pointer Up (Stop Drawing)
   container.addEventListener("pointerup", (e) => {
+    if (window.hasDetectedStylus && e.pointerType !== "pen") return;
+
     isDrawing = false;
     lastTouchedElement = null;
-    container.releasePointerCapture(e.pointerId);
+    try {
+      container.releasePointerCapture(e.pointerId);
+    } catch (err) {
+      // Ignore if pointer was not captured
+    }
 
     if (currentStroke.length > 0) {
       historyStack.push(currentStroke);
