@@ -1549,5 +1549,12 @@ input[type="number"] {
   /* Reduce gap between header and grid */
   .container {
     margin-top: 0;
+    width: 95vmin;
+    height: 95vmin;
+  }
+
+  /* Update switch alignment for larger grid */
+  .draw-mode-switch.vertical-retro {
+    margin-left: calc(50% - 47.5vmin);
   }
 }
