@@ -296,6 +296,13 @@ button:active,
   padding-bottom: 50px;
   touch-action: pan-y; /* Enable vertical scroll */
   -webkit-overflow-scrolling: touch; /* Momentum scroll */
+
+  /* Hide Scrollbar but allow scroll */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.saved-list-grid::-webkit-scrollbar {
+  display: none;
 }
 
 /* Helper to hide Elements */
@@ -463,6 +470,13 @@ button:active,
   border: 2px solid var(--btn-border);
   background: var(--bg-container);
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+
+  /* Hide Scrollbar but allow scroll */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.saved-sidebar::-webkit-scrollbar {
+  display: none;
 }
 
 .saved-list {
