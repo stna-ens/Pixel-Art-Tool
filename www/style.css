@@ -1144,20 +1144,20 @@ button:active,
     /* Grid Left Edge ~= 50% - 41.5vmin */
     /* Place Panel 15px to left of Grid */
     left: auto;
-    right: calc(50% + 41.5vmin + 15px);
-    width: 100px; /* Slimmer */
+    right: calc(50% + 41.5vmin + 13px);
+    width: 85px; /* Slimmer */
     height: auto;
     max-width: none;
     background: var(--bg-container);
     border: 2px solid var(--btn-border);
     box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
     z-index: 100 !important;
-    padding: 20px 10px; /* More vertical padding */
+    padding: 15px 5px; /* compact padding */
     animation: none;
 
     /* Layout inside the panel */
     flex-direction: column;
-    gap: 15px; /* More gap */
+    gap: 10px; /* Compact gap */
     align-items: center; /* Center everything */
   }
 
@@ -1169,9 +1169,9 @@ button:active,
   .modal-slider {
     /* Vertical Slider in Landscape */
     transform: rotate(-90deg);
-    width: 100px;
+    width: 85px;
     height: 10px;
-    margin: 60px 0; /* More Space for rotation */
+    margin: 50px 0; /* scaled margin */
   }
 
   .input-row {
@@ -1183,20 +1183,20 @@ button:active,
 
   .cell-count-modal input[type="number"] {
     width: 100%;
-    height: 40px;
-    font-size: 24px;
+    height: 35px;
+    font-size: 22px;
     text-align: center; /* Explicit center */
   }
 
   .cell-count-modal button {
-    height: 30px; /* Smaller button */
-    font-size: 16px;
+    height: 25px; /* Smaller button */
+    font-size: 14px;
     width: 100%;
-    line-height: 26px; /* Center text vertical */
+    line-height: 21px; /* Center text vertical */
   }
 
   .modal-header {
-    font-size: 18px; /* Smaller text */
+    font-size: 16px; /* Smaller text */
     border-bottom: 2px solid;
     width: 100%;
     text-align: center;
@@ -1214,7 +1214,7 @@ button:active,
   /* When Panel is OPEN, move Tools further left */
   body.cell-panel-open .tools {
     /* Move left by Panel Width (100px) + Gap (15px) + Tool Gap Diff? No just stack */
-    right: calc(50% + 41.5vmin + 23px + 100px + 20px);
+    right: calc(50% + 41.5vmin + 13px + 85px + 10px);
   }
 }
 
