@@ -23,11 +23,18 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css?v=2.3" />
-  </head>
-  <body>
     <script>
-      console.log("DEBUG: HTML Loaded");
       window.onerror = function (msg, source, lineno, colno, error) {
+        // Alert for immediate visibility on stubborn mobile devices
+        alert(
+          "Error: " +
+            msg +
+            "\n" +
+            (source || "unknown").split("/").pop() +
+            ":" +
+            lineno
+        );
+
         var errDiv = document.createElement("div");
         errDiv.style.cssText =
           "position:fixed;top:0;left:0;right:0;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-size:14px;font-family:monospace;pointer-events:none;white-space:pre-wrap;text-align:left;";
@@ -38,8 +45,29 @@
           (source ? source.split("/").pop() : "unknown") +
           "\nLine: " +
           lineno;
-        document.body.appendChild(errDiv);
+        document.documentElement.appendChild(errDiv);
       };
+      console.log("DEBUG: HTML Parsing...");
+    </script>
+  </head>
+  <body>
+    <div
+      id="appLoading"
+      style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-family: monospace;
+        color: black;
+        z-index: 9999;
+      "
+    >
+      LOADING...
+    </div>
+    <script>
+      console.log("DEBUG: Body Loaded");
     </script>
     <div class="content-wrapper">
       <div class="header">
