@@ -2726,11 +2726,24 @@ if (drawModeSwitch) {
   const options = drawModeSwitch.querySelectorAll(".mode-option");
 
   options.forEach((option) => {
-    option.onclick = () => {
-      const selectedMode = option.dataset.mode;
+    option.onclick = (e) => {
+      // Prevent default to avoid any ghost clicks
+      e.preventDefault();
 
-      // Update global state
-      drawingMode = selectedMode;
+      // Strict check: if already active, do nothing
+      if (option.classList.contains("active")) {
+        return;
+      }
+
+      // Explicitly check the text content to ensure correct mode assignment
+      // This bypasses any potential dataset issues
+      const text = option.textContent.trim();
+
+      if (text === "INST") {
+        drawingMode = "instant";
+      } else {
+        drawingMode = "progressive";
+      }
 
       // Update UI
       options.forEach((opt) => opt.classList.remove("active"));
@@ -2741,14 +2754,4 @@ if (drawModeSwitch) {
     };
   });
 }
-
-// Drawing Mode Toggle Switch
-const drawModeBtn = document.getElementById("drawModeBtn");
-if (drawModeBtn) {
-  drawModeBtn.onclick = () => {
-    drawingMode = drawingMode === "progressive" ? "instant" : "progressive";
-    drawModeBtn.textContent =
-      drawingMode === "progressive" ? "Progressive" : "Instant";
-    if (navigator.vibrate) navigator.vibrate(10);
-  };
-}
+// Removed legacy drawModeBtn code to prevent conflicts

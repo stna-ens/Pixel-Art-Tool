@@ -347,8 +347,8 @@ button:active,
   background-color: var(--bg-container);
 
   /* Responsive sizing */
-  width: 82vmin;
-  height: 82vmin;
+  width: 85vmin;
+  height: 85vmin;
 
   margin: 0 auto 10px auto;
   touch-action: none;
@@ -601,8 +601,8 @@ button:active,
   .container {
     margin: 0 auto; /* Dead Center */
     /* Fit nicely in landscape height */
-    width: 80vmin;
-    height: 80vmin;
+    width: 83vmin;
+    height: 83vmin;
     flex-shrink: 0;
     box-shadow: 8px 8px 0px rgba(0, 0, 0, 1);
   }
@@ -1470,8 +1470,8 @@ input[type="number"] {
   position: absolute;
   /* Align with TOP of Grid: Center (50%) - Half Height (40vmin) */
   top: calc(50% - 40vmin);
-  /* Position to RIGHT of Grid: Center (50%) + Half Width (40vmin) + Gap (20px) */
-  left: calc(50% + 40vmin + 20px);
+  /* Position to RIGHT of Grid: Center (50%) + Half Width (42.5vmin) + Gap (6px) */
+  left: calc(50% + 42.5vmin + 6px);
   right: auto; /* Clear right prop */
 
   display: flex;
@@ -1527,34 +1527,45 @@ input[type="number"] {
     margin-left: calc(50% - 41vmin);
     margin-bottom: 8px;
 
-    /* Horizontal layout */
+    /* Horizontal layout - merged buttons */
     flex-direction: row;
+    gap: 0; /* No gap - buttons are merged */
     width: auto;
-    height: 28px; /* Smaller Height */
+    height: auto;
+
+    /* Blocky container style */
+    border: 2px solid var(--btn-border);
+    background-color: var(--btn-bg);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
   }
 
   .mode-option {
     width: auto;
-    padding: 0 10px; /* Smaller Padding */
-    height: 28px; /* Match Container */
-    font-size: 14px; /* Smaller Font */
-    border-bottom: none !important;
+    padding: 0 12px;
+    height: 36px;
+    font-size: 16px;
+
+    /* Remove individual borders - they share the container border */
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+    border-radius: 0;
   }
 
   .mode-option:first-child {
-    border-bottom: none;
+    /* Divider between buttons */
     border-right: 2px solid var(--btn-border);
   }
 
   /* Reduce gap between header and grid */
   .container {
     margin-top: 0;
-    width: 95vmin;
-    height: 95vmin;
+    width: 93vmin;
+    height: 93vmin;
   }
 
   /* Update switch alignment for larger grid */
   .draw-mode-switch.vertical-retro {
-    margin-left: calc(50% - 47.5vmin);
+    margin-left: calc(50% - 46.5vmin);
   }
 }
