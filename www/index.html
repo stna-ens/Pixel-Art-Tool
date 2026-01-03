@@ -22,11 +22,24 @@
       href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=2.2" />
+    <link rel="stylesheet" href="style.css?v=2.3" />
   </head>
   <body>
     <script>
       console.log("DEBUG: HTML Loaded");
+      window.onerror = function (msg, source, lineno, colno, error) {
+        var errDiv = document.createElement("div");
+        errDiv.style.cssText =
+          "position:fixed;top:0;left:0;right:0;background:rgba(255,0,0,0.9);color:white;padding:20px;z-index:99999;font-size:14px;font-family:monospace;pointer-events:none;white-space:pre-wrap;text-align:left;";
+        errDiv.innerText =
+          "Error: " +
+          msg +
+          "\nFile: " +
+          (source ? source.split("/").pop() : "unknown") +
+          "\nLine: " +
+          lineno;
+        document.body.appendChild(errDiv);
+      };
     </script>
     <div class="content-wrapper">
       <div class="header">
@@ -282,7 +295,7 @@
       </svg>
     </button>
 
-    <script src="script.js?v=2.2"></script>
+    <script src="script.js?v=2.3"></script>
     <script>
       // Force unregister any legacy service workers
       try {

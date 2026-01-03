@@ -575,16 +575,14 @@ function renderLayerList() {
 }
 
 // Setup Layer UI Controls
-document.getElementById("addLayerBtn")?.addEventListener("click", addLayer);
-document
-  .getElementById("deleteLayerBtn")
-  ?.addEventListener("click", deleteLayer);
-document
-  .getElementById("moveLayerUpBtn")
-  ?.addEventListener("click", moveLayerUp);
-document
-  .getElementById("moveLayerDownBtn")
-  ?.addEventListener("click", moveLayerDown);
+const addLayerBtn = document.getElementById("addLayerBtn");
+if (addLayerBtn) addLayerBtn.addEventListener("click", addLayer);
+const deleteLayerBtn = document.getElementById("deleteLayerBtn");
+if (deleteLayerBtn) deleteLayerBtn.addEventListener("click", deleteLayer);
+const moveLayerUpBtn = document.getElementById("moveLayerUpBtn");
+if (moveLayerUpBtn) moveLayerUpBtn.addEventListener("click", moveLayerUp);
+const moveLayerDownBtn = document.getElementById("moveLayerDownBtn");
+if (moveLayerDownBtn) moveLayerDownBtn.addEventListener("click", moveLayerDown);
 
 // Panel Toggle
 const layersPanel = document.getElementById("layersPanel");
