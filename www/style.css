@@ -1517,11 +1517,15 @@ input[type="number"] {
 @media (max-width: 768px) {
   .draw-mode-switch.vertical-retro {
     /* Reset positioning */
+    position: relative;
     right: auto;
-    /* Align with Grid Left Edge: Center (50%) - Half Grid Width (41vmin) */
-    left: calc(50% - 41vmin);
-    /* Position above the grid */
-    top: 100px;
+    left: auto;
+    top: auto;
+
+    /* Align with grid - placed inside flow */
+    align-self: flex-start;
+    margin-left: calc(50% - 41vmin);
+    margin-bottom: 8px;
 
     /* Horizontal layout */
     flex-direction: row;
@@ -1542,8 +1546,8 @@ input[type="number"] {
     border-right: 2px solid var(--btn-border);
   }
 
-  /* Add margin to container to prevent overlap */
+  /* Reduce gap between header and grid */
   .container {
-    margin-top: 60px;
+    margin-top: 0;
   }
 }
