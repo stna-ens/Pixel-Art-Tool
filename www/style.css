@@ -546,7 +546,7 @@ button:active,
     position: absolute;
     /* Calculated placement: 50% (Center) + 41.5vmin (Half Grid) + 25px (Gap) */
     /* This puts the tools to the LEFT of the centered grid */
-    right: calc(50% + 41.5vmin + 25px);
+    right: calc(50% + 41.5vmin + 23px);
     left: auto; /* Unset the previous left pinning */
     top: 50%;
     transform: translateY(-50%); /* Vertical Center */
@@ -1207,14 +1207,14 @@ button:active,
   .tools {
     transition: right 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     /* Default pos: now 41.5vmin + 25px */
-    right: calc(50% + 41.5vmin + 25px);
+    right: calc(50% + 41.5vmin + 23px);
     z-index: 90;
   }
 
   /* When Panel is OPEN, move Tools further left */
   body.cell-panel-open .tools {
     /* Move left by Panel Width (100px) + Gap (15px) + Tool Gap Diff? No just stack */
-    right: calc(50% + 41.5vmin + 25px + 100px + 20px);
+    right: calc(50% + 41.5vmin + 23px + 100px + 20px);
   }
 }
 
