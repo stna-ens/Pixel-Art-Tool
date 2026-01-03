@@ -60,6 +60,12 @@ function initApp() {
   const loadingEl = document.getElementById("appLoading");
   if (loadingEl) loadingEl.style.display = "none";
 
+  const contentWrapper = document.querySelector(".content-wrapper");
+  if (contentWrapper) {
+    contentWrapper.style.visibility = "visible";
+    contentWrapper.style.opacity = "1";
+  }
+
   // Mobile Debug Logger (Temporary)
   window.onerror = function (msg, source, lineno, colno, error) {
     const errDiv = document.createElement("div");

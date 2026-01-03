@@ -52,6 +52,9 @@ body {
   */
   padding-top: max(60px, env(safe-area-inset-top) + 20px);
   padding-bottom: 20px;
+  visibility: visible; /* Restore default visibility */
+  opacity: 1;
+  z-index: 1; /* Ensure above body background if needed */
 }
 
 .game-area {
