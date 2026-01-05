@@ -161,6 +161,9 @@ button:active,
   text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.3); /* Deeper shadow */
   white-space: nowrap;
   letter-spacing: 5px; /* More spacing for the bold look */
+
+  /* Alignment adjustment */
+  line-height: 1;
 }
 
 .beta-tag {
@@ -960,45 +963,15 @@ button:active,
   font-size: 20px;
 }
 
-/* Delete Layer Button - Keyboard Key Style */
+/* Delete Layer Button - Standard Style */
 .delete-btn {
-  background-color: var(--btn-bg); /* Match theme */
-  color: var(--btn-text);
-  border: 2px solid var(--btn-border);
-  border-bottom-width: 4px; /* Keycap depth */
-  border-radius: 6px; /* Slightly rounder like Mac keys */
-  width: 50px; /* Fixed width for icon */
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: none; /* Reset retro shadow */
-  transition: all 0.1s;
-  padding: 0;
-}
-
-.delete-btn svg {
-  width: 24px;
-  height: 24px;
-  fill: #333;
+  /* Inherit standard button styles */
+  /* Red override for delete action */
 }
 
 .delete-btn:hover {
-  background-color: #ff5555; /* Match Reset Button Red */
-  border-color: #000;
-  transform: translateY(1px);
-  border-bottom-width: 3px;
-}
-
-/* Change icon color to white on hover */
-.delete-btn:hover svg path {
-  fill: white;
-}
-
-.delete-btn:active {
-  transform: translateY(3px);
-  border-bottom-width: 1px;
-  background-color: #cc4444; /* Darker red for active */
+  background-color: #ff5555; /* Danger Ref */
+  color: white;
 }
 
 /* Layers List Grid */
@@ -1027,7 +1000,8 @@ button:active,
 .layer-item {
   width: 200px; /* Even bigger center square */
   height: 200px;
-  border: 2px solid var(--btn-border);
+  /* Inactive layers get a generic "other" color to recede */
+  border: 4px solid rgba(128, 128, 128, 0.4);
   background-color: #fff;
   cursor: pointer;
   display: flex;
@@ -1043,10 +1017,12 @@ button:active,
 .layer-item:hover {
   background-color: #fff; /* Keep white */
   transform: scale(1.05); /* Pop effect like saved items */
+  border-color: rgba(128, 128, 128, 0.8);
 }
 
 .layer-item.active {
-  border: 4px solid #000; /* Bold border for active state */
+  /* Active matches the theme exactly and is much thicker */
+  border: 8px solid var(--btn-border);
   box-shadow: inset 0 0 0 1px #fff; /* Inner contrast */
 }
 

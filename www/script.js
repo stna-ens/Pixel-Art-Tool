@@ -1840,6 +1840,7 @@ const defaultThemes = {
 
 let customThemes = {};
 let activeThemeId = "poolsuite";
+let editingThemeId = null; // Track which theme is being edited
 
 const themeModal = document.getElementById("themeModal");
 const themeBtn = document.getElementById("themeBtn");
@@ -2051,15 +2052,11 @@ function createThemeCard(theme, isCustom) {
 
     const renameBtn = document.createElement("button");
     renameBtn.innerHTML = "✎";
-    renameBtn.title = "Rename";
+    renameBtn.title = "Edit";
     renameBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      try {
-        renameTheme(null, theme.id);
-      } catch (err) {
-        alert("Error renaming: " + err.message);
-      }
+      startEditingTheme(theme.id);
     };
 
     const deleteBtn = document.createElement("button");
@@ -2228,7 +2225,15 @@ applyPreviewBtn.onclick = () => {
 // Handle Custom Theme Save & Apply
 saveCustomBtn.onclick = () => {
   const name = customInputs.name.value.trim() || `Custom Theme ${Date.now()}`;
-  const id = `custom_${Date.now()}`;
+
+  let id;
+  if (editingThemeId) {
+    // Update existing
+    id = editingThemeId;
+  } else {
+    // Create new
+    id = `custom_${Date.now()}`;
+  }
 
   const customTheme = {
     name: name,
@@ -2239,20 +2244,73 @@ saveCustomBtn.onclick = () => {
   customThemes[id] = customTheme;
   saveCustomThemesToStorage();
 
-  customThemes[id] = customTheme;
-  saveCustomThemesToStorage();
-
   // Render the new theme in the list
   renderThemeOptions();
 
   // Visual Feedback
   const originalText = saveCustomBtn.textContent;
-  saveCustomBtn.textContent = "Saved!";
-  setTimeout(() => (saveCustomBtn.textContent = originalText), 1000);
+  saveCustomBtn.textContent = editingThemeId ? "Updated!" : "Saved!";
+  setTimeout(() => {
+    saveCustomBtn.textContent = "Save Custom Theme"; // Always revert to default text
+    // If we were editing, stop editing mode now
+    if (editingThemeId) {
+      cancelEditMode();
+    }
+  }, 1000);
 
-  // Clear Name input (optional)
-  customInputs.name.value = "";
+  // If creating new, clear name. If updating, we keep it (or clear it via cancelEditMode above?)
+  // Let's clear inputs if it was a new creation
+  if (!editingThemeId) {
+    customInputs.name.value = "";
+  }
 };
+
+function startEditingTheme(id) {
+  const theme = customThemes[id];
+  if (!theme) return;
+
+  editingThemeId = id;
+
+  // Populate inputs
+  customInputs.name.value = theme.name;
+  customInputs["--bg-main"].value = theme.colors["--bg-main"];
+  customInputs["--bg-container"].value = theme.colors["--bg-container"];
+  customInputs["--bg-cell"].value = theme.colors["--bg-cell"];
+  customInputs["--btn-bg"].value = theme.colors["--btn-bg"];
+  customInputs["--text-main"].value = theme.colors["--text-main"];
+
+  // Update Button Text
+  saveCustomBtn.textContent = "Update Theme";
+
+  // Scroll to inputs
+  const customSection = document.querySelector(".custom-theme-inputs");
+  if (customSection) customSection.scrollIntoView({ behavior: "smooth" });
+
+  // Show Cancel Button (if we added one, or toggle visibility)
+  let cancelBtn = document.getElementById("cancelEditThemeBtn");
+  if (!cancelBtn) {
+    // Create if doesn't exist (lazy init)
+    cancelBtn = document.createElement("button");
+    cancelBtn.id = "cancelEditThemeBtn";
+    cancelBtn.textContent = "Cancel Edit";
+    cancelBtn.className = "secondary-btn";
+    cancelBtn.style.marginLeft = "10px";
+    cancelBtn.onclick = cancelEditMode;
+    saveCustomBtn.parentNode.appendChild(cancelBtn);
+  }
+  cancelBtn.style.display = "inline-block";
+}
+
+function cancelEditMode() {
+  editingThemeId = null;
+  saveCustomBtn.textContent = "Save Custom Theme";
+  customInputs.name.value = "";
+  // Reset colors to defaults or keep? Better to clear or reset to current active theme?
+  // Let's reset to active theme for convenience, or just leave as is. User can pick colors.
+
+  const cancelBtn = document.getElementById("cancelEditThemeBtn");
+  if (cancelBtn) cancelBtn.style.display = "none";
+}
 
 // Robust Color Parser using the Browser's own engine
 function parseColorString(colorStr) {
