@@ -2350,14 +2350,35 @@ function applyTheme(themeObj) {
     cachedBaseColors = parseColorString(themeObj["--bg-cell"]);
   }
 
-  // Also update existing cells to the new grid color if they are "empty"
-  const cells = document.querySelectorAll(".cell");
-  cells.forEach((cell) => {
-    // If cell is "blank" (percent 0), reset it to use the new var or update it.
-    if (!cell.dataset.percent || cell.dataset.percent === "0") {
-      cell.style.backgroundColor = "var(--bg-cell)";
-    }
-  });
+  // Update existing cells based on Layer Logic
+  // Only the bottom layer (index 0) should use the theme's cell background color for empty cells.
+  // Upper layers must remain transparent to show the layers below.
+  if (typeof layers !== "undefined" && Array.isArray(layers)) {
+    layers.forEach((layer, index) => {
+      const cells = layer.div.querySelectorAll(".cell");
+      cells.forEach((cell) => {
+        // Only touch "empty" cells
+        if (!cell.dataset.percent || cell.dataset.percent === "0") {
+          if (index === 0) {
+            // Bottom layer gets the theme background
+            cell.style.backgroundColor = "var(--bg-cell)";
+          } else {
+            // Upper layers must be transparent
+            cell.style.backgroundColor = "transparent";
+          }
+        }
+      });
+    });
+  } else {
+    // Fallback if layers aren't initialized yet (rare, but safety first)
+    // If no layers array, we might be in early init or flat structure
+    const cells = document.querySelectorAll(".cell");
+    cells.forEach((cell) => {
+      if (!cell.dataset.percent || cell.dataset.percent === "0") {
+        cell.style.backgroundColor = "var(--bg-cell)";
+      }
+    });
+  }
 }
 
 /* Export Logic */
