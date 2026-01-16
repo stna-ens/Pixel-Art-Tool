@@ -108,6 +108,7 @@
         <span class="title-text"
           >Pixy <span class="beta-tag">(beta)</span></span
         >
+        <div id="proBadge" class="pro-badge hidden">PRO</div>
         <button id="saveDraftBtn" class="header-btn">Save</button>
       </div>
       <div class="game-area">
@@ -394,6 +395,51 @@
         />
       </svg>
     </button>
+
+    <!-- RevenueCat Paywall Modal -->
+    <div id="paywallModal" class="theme-modal">
+      <div class="modal-content paywall-content">
+        <span class="close-paywall">&times;</span>
+        <h2 class="paywall-title">UNLOCK PIXY PRO</h2>
+        <div class="paywall-features">
+          <div class="feature-item">
+            <span class="feature-icon">✨</span>
+            <div class="feature-text">
+              <strong>Unlimited Layers</strong>
+              <p>Break the 3-layer limit. Create complex art.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">🎨</span>
+            <div class="feature-text">
+              <strong>Premium Themes</strong>
+              <p>Access Cyberpunk, Vaporwave, and more.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="feature-icon">❤️</span>
+            <div class="feature-text">
+              <strong>Support Indie Dev</strong>
+              <p>Help keep Pixy ad-free and updated.</p>
+            </div>
+          </div>
+        </div>
+        <div class="paywall-actions">
+          <button id="purchaseMonthlyBtn" class="paywall-btn">
+            <span>Monthly</span>
+            <span id="priceMonthly">...</span>
+          </button>
+          <button id="purchaseYearlyBtn" class="paywall-btn highlight">
+            <span>Yearly (Best Value)</span>
+            <span id="priceYearly">...</span>
+          </button>
+        </div>
+        <button id="restorePurchasesBtn" class="restore-btn">
+          Restore Purchases
+        </button>
+        <p class="paywall-footer">Recurring billing. Cancel anytime.</p>
+      </div>
+    </div>
 
     <script src="script.js?v=2.3"></script>
     <script>

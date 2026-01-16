@@ -1666,3 +1666,149 @@ input[type="number"] {
     margin-left: calc(50% - 46.5vmin);
   }
 }
+
+/* --- REVENUECAT & PAYWALL --- */
+
+/* Pro Badge */
+.pro-badge {
+  background: #ffd700;
+  color: #000; /* Black text for contrast */
+  font-size: 14px;
+  padding: 2px 5px;
+  border: 2px solid #000;
+  margin-left: 10px;
+  font-weight: bold;
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+  display: inline-block;
+  vertical-align: middle;
+  transform: translateY(-2px); /* Slight lift */
+  animation: shine 3s infinite; /* Optional: Simple attention getter */
+}
+
+@keyframes shine {
+  0%,
+  90% {
+    transform: translateY(-2px) scale(1);
+  }
+  95% {
+    transform: translateY(-3px) scale(1.1);
+  }
+  100% {
+    transform: translateY(-2px) scale(1);
+  }
+}
+
+/* Paywall Specifics */
+.paywall-content {
+  max-width: 500px;
+  text-align: center;
+  border: 4px solid var(--btn-border); /* Thicker border for importance */
+}
+
+.paywall-title {
+  font-size: 48px;
+  margin-bottom: 20px;
+  color: var(--text-main);
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.2);
+  -webkit-text-stroke: 1px var(--text-main);
+}
+
+.paywall-features {
+  text-align: left;
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 15px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.05); /* Slight separation */
+  border: 2px solid transparent;
+}
+.feature-item:hover {
+  border: 2px solid var(--btn-border);
+  background: var(--bg-main);
+}
+
+.feature-icon {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.feature-text strong {
+  font-size: 24px;
+  display: block;
+  margin-bottom: 2px;
+}
+.feature-text p {
+  font-size: 18px;
+  opacity: 0.8;
+  margin: 0;
+}
+
+.paywall-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.paywall-btn {
+  width: 100%;
+  padding: 15px;
+  font-size: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid var(--btn-border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.paywall-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0px rgba(0, 0, 0, 1);
+}
+
+.paywall-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+.paywall-btn.highlight {
+  background: #ffd700; /* Gold */
+  color: black;
+  border-color: black;
+}
+
+.restore-btn {
+  background: transparent;
+  border: none;
+  text-decoration: underline;
+  font-size: 18px;
+  color: var(--text-main);
+  box-shadow: none;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.paywall-footer {
+  font-size: 14px;
+  opacity: 0.6;
+}
+
+.close-paywall {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 30px;
+  cursor: pointer;
+  font-weight: bold;
+}
