@@ -2587,12 +2587,10 @@ function renderSavedDrawings() {
       del.innerHTML = "&times;";
       del.onclick = (e) => {
         e.stopPropagation();
-        if (confirm("Delete?")) {
-          saves = saves.filter((s) => s.id !== save.id);
-          localStorage.setItem("pixy_saves", JSON.stringify(saves));
-          renderSavedDrawings();
-        }
+        pendingDeleteId = save.id;
+        document.getElementById("deleteConfirmModal").classList.add("show");
       };
+
       div.appendChild(del);
 
       div.onclick = () => {
@@ -2601,10 +2599,80 @@ function renderSavedDrawings() {
         if (savedProjectsModal) savedProjectsModal.classList.remove("active");
       };
 
-      // Validation for Edit Mode (Long press logic omitted for brevity but structure is here)
+      // Validation for Edit Mode (Long press logic)
+      let longPressTimer;
+      const startLongPress = (e) => {
+        // Only if not already in edit mode?
+        longPressTimer = setTimeout(() => {
+          document.body.classList.add("edit-mode");
+          // Add visual wiggle or just show delete buttons via CSS
+        }, 800); // 800ms threshold
+      };
+      const cancelLongPress = () => {
+        clearTimeout(longPressTimer);
+      };
+
+      div.addEventListener("mousedown", startLongPress);
+      div.addEventListener("touchstart", startLongPress);
+      div.addEventListener("mouseup", cancelLongPress);
+      div.addEventListener("mouseleave", cancelLongPress);
+      div.addEventListener("touchend", cancelLongPress);
+      div.addEventListener("touchmove", cancelLongPress);
+
       list.appendChild(div);
     });
   });
+
+  // Global listener to exit edit mode if clicking outside (and not clicking a delete button)
+  if (!window.hasAddedEditModeListener) {
+    document.addEventListener("click", (e) => {
+      if (
+        document.body.classList.contains("edit-mode") &&
+        !e.target.closest(".saved-item")
+      ) {
+        document.body.classList.remove("edit-mode");
+      }
+    });
+    window.hasAddedEditModeListener = true;
+  }
+}
+
+// Global variable for pending delete
+let pendingDeleteId = null;
+
+// Initialize Delete Modal Listeners
+const deleteConfirmModal = document.getElementById("deleteConfirmModal");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+if (confirmDeleteBtn) {
+  confirmDeleteBtn.onclick = () => {
+    if (pendingDeleteId) {
+      let saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+      saves = saves.filter((s) => s.id !== pendingDeleteId);
+      localStorage.setItem("pixy_saves", JSON.stringify(saves));
+      renderSavedDrawings();
+      pendingDeleteId = null;
+    }
+    deleteConfirmModal.classList.remove("show");
+  };
+}
+
+if (cancelDeleteBtn) {
+  cancelDeleteBtn.onclick = () => {
+    pendingDeleteId = null;
+    deleteConfirmModal.classList.remove("show");
+  };
+}
+
+// Close modal when clicking outside
+if (deleteConfirmModal) {
+  deleteConfirmModal.onclick = (e) => {
+    if (e.target === deleteConfirmModal) {
+      pendingDeleteId = null;
+      deleteConfirmModal.classList.remove("show");
+    }
+  };
 }
 saveCustomBtn.onclick = () => {
   const name = customInputs.name.value.trim() || `Custom Theme ${Date.now()}`;

@@ -563,6 +563,33 @@ button:active,
   transform: scale(1.1);
 }
 
+/* Edit Mode Styles */
+body.edit-mode .saved-item .delete-save {
+  display: block;
+}
+
+body.edit-mode .saved-item {
+  animation: shake 0.3s infinite ease-in-out;
+}
+
+@keyframes shake {
+  0% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-1deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
 .modal-delete-btn {
   width: 100%;
   background: var(--btn-bg);
