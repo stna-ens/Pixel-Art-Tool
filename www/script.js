@@ -628,7 +628,7 @@ function undo() {
       stroke.x,
       stroke.y,
       stroke.prevColor,
-      stroke.prevPercent
+      stroke.prevPercent,
     );
   });
 
@@ -681,7 +681,7 @@ function saveDraft() {
               x * tCellSize,
               y * tCellSize,
               tCellSize + 0.5,
-              tCellSize + 0.5
+              tCellSize + 0.5,
             );
           }
         }
@@ -757,7 +757,7 @@ function loadLayerData(layer, dataArray) {
         x,
         y,
         cellData.color,
-        parseFloat(cellData.percent)
+        parseFloat(cellData.percent),
       );
     }
   });
@@ -1119,6 +1119,10 @@ if (eraserBtn) {
     eraserBtn.classList.toggle("active");
   };
 }
+
+// Save
+const saveDraftBtn = document.getElementById("saveDraftBtn");
+if (saveDraftBtn) saveDraftBtn.addEventListener("click", saveDraft);
 
 // Undo
 const undoBtn = document.getElementById("undoBtn");
