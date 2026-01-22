@@ -32,7 +32,7 @@
             "\n" +
             (source || "unknown").split("/").pop() +
             ":" +
-            lineno
+            lineno,
         );
 
         var errDiv = document.createElement("div");
@@ -105,9 +105,7 @@
             <rect fill="currentColor" x="5" y="9" width="1" height="1" />
           </svg>
         </button>
-        <span class="title-text"
-          >Pixy <span class="beta-tag">(beta)</span></span
-        >
+        <span class="title-text">Pixy</span>
         <div id="proBadge" class="pro-badge hidden">PRO</div>
         <button id="saveDraftBtn" class="header-btn">Save</button>
       </div>

@@ -166,25 +166,6 @@ button:active,
   line-height: 1;
 }
 
-.beta-tag {
-  font-size: 14px;
-  color: #ff5555;
-  text-shadow: none;
-  -webkit-text-stroke: 0;
-  letter-spacing: 0;
-  position: absolute;
-  bottom: -4px;
-  right: -35px;
-  background: transparent;
-  border: none;
-  padding: 0;
-  box-shadow: none;
-  transform: none;
-  font-weight: normal;
-  font-family: "VT323", monospace;
-  text-transform: lowercase;
-}
-
 #undoBtn {
   background-color: var(--btn-bg);
   border: 2px solid var(--btn-border);
