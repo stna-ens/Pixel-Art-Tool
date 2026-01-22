@@ -1,6 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <script>
+      if (window.location.hostname.includes("pages.dev")) {
+        window.location.replace(
+          "https://pixystudio.app" + window.location.pathname,
+        );
+      }
+    </script>
     <!-- Google tag (gtag.js) -->
     <script
       async
@@ -26,6 +33,7 @@
     />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
+    <link rel="canonical" href="https://pixystudio.app/" />
 
     <title>Pixy</title>
     <link rel="icon" type="image/png" href="icon.png" />
