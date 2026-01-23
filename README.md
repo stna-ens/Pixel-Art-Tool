@@ -5,8 +5,7 @@
 
 # 👉 [Launch Studio](https://pixystudio.app)
 
-![Pixy Studio Interface](<img width="1511" height="856" alt="Ekran Resmi 2026-01-23 18 21 08" src="https://github.com/user-attachments/assets/6d9d5b2c-b1ec-4f1c-b489-d730dfa09dad" />
-)
+<img width="1511" height="856" alt="Ekran Resmi 2026-01-23 18 21 08" src="https://github.com/user-attachments/assets/6d9d5b2c-b1ec-4f1c-b489-d730dfa09dad" />
 
 ---
 
