@@ -1,7 +1,7 @@
 # Pixy Studio
 
 > **Creative freedom shouldn't require a monthly subscription.**
-> A lightweight, distraction-free pixel art engine that runs everywhere.
+> A lightweight, distraction-free pixel art tool that runs everywhere.
 
 # 👉 [Launch Studio](https://pixystudio.app)
 
