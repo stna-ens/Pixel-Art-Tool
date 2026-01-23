@@ -226,14 +226,22 @@
     <div id="cellCountPanel" class="cell-count-modal hidden">
       <div class="modal-header">CELL COUNT</div>
       <div class="cell-panel-content">
-        <input
-          type="range"
-          id="cellSlider"
-          min="1"
-          max="100"
-          value="16"
-          class="modal-slider"
-        />
+        <div class="slider-wrapper">
+          <div class="cell-presets">
+            <div class="preset-mark" data-val="64">64</div>
+            <div class="preset-mark" data-val="32">32</div>
+            <div class="preset-mark" data-val="16">16</div>
+            <div class="preset-mark" data-val="8">8</div>
+          </div>
+          <input
+            type="range"
+            id="cellSlider"
+            min="1"
+            max="100"
+            value="16"
+            class="modal-slider"
+          />
+        </div>
         <div class="input-row">
           <input
             type="number"

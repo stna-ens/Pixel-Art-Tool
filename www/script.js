@@ -1184,6 +1184,36 @@ if (cellCountPanel) {
     createGrid(gridNumber);
     toggleCellCountPanel();
   };
+
+  // Presets Logic
+  const presetMarks = cellCountPanel.querySelectorAll(".preset-mark");
+
+  function updateActivePreset() {
+    const currentVal = parseInt(cellSlider.value);
+    presetMarks.forEach((p) => {
+      const pVal = parseInt(p.dataset.val);
+      if (pVal === currentVal) {
+        p.classList.add("active");
+      } else {
+        p.classList.remove("active");
+      }
+    });
+  }
+
+  presetMarks.forEach((preset) => {
+    preset.onclick = (e) => {
+      e.stopPropagation();
+      const val = parseInt(preset.dataset.val);
+      if (val) {
+        cellSlider.value = val;
+        cellNumberInput.value = val;
+        updateActivePreset();
+      }
+    };
+  });
+
+  cellSlider.addEventListener("input", updateActivePreset);
+  updateActivePreset(); // Initialize on load
 }
 
 // Saved Modal stuff

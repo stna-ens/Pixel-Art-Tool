@@ -1190,7 +1190,80 @@ body.edit-mode .saved-item {
   background: #fff;
   border: 2px solid #000;
   outline: none;
-  margin: 10px 0;
+  margin: 0; /* Reset margin, wrapper handles it */
+}
+
+/* Slider Wrapper & Presets (Portrait Default) */
+.slider-wrapper {
+  position: relative;
+  width: 100%;
+  margin: 10px 0 25px 0; /* Extra bottom margin for ruler numbers */
+}
+
+.cell-presets {
+  position: absolute;
+  bottom: -20px;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  pointer-events: none;
+}
+
+.preset-mark {
+  position: absolute;
+  transform: translateX(-50%);
+  font-family: "VT323", monospace;
+  font-size: 16px;
+  color: #000;
+  cursor: pointer;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.preset-mark::before {
+  content: "|";
+  font-size: 10px;
+  margin-bottom: -4px;
+  font-weight: bold;
+}
+
+.preset-mark:hover {
+  font-weight: bold;
+  color: var(--btn-active-bg);
+}
+
+.preset-mark.active {
+  color: var(--btn-active-bg);
+  font-weight: 900;
+  animation: presetPop 0.15s ease-out;
+}
+
+@keyframes presetPop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Positioning for Portrait (Horizontal) */
+.preset-mark[data-val="8"] {
+  left: 8%;
+}
+.preset-mark[data-val="16"] {
+  left: 16%;
+}
+.preset-mark[data-val="32"] {
+  left: 32%;
+}
+.preset-mark[data-val="64"] {
+  left: 64%;
 }
 
 .modal-slider::-webkit-slider-thumb {
@@ -1240,25 +1313,20 @@ body.edit-mode .saved-item {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    /* Position: Next to the Centered Grid */
-    /* Grid Left Edge ~= 50% - 41.5vmin */
-    /* Place Panel 15px to left of Grid */
     left: auto;
     right: calc(50% + 41.5vmin + 13px);
-    width: 85px; /* Slimmer */
+    width: 85px; /* Original thin width */
     height: auto;
     max-width: none;
     background: var(--bg-container);
     border: 2px solid var(--btn-border);
     box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
     z-index: 100 !important;
-    padding: 15px 5px; /* compact padding */
+    padding: 15px 5px;
     animation: none;
-
-    /* Layout inside the panel */
     flex-direction: column;
-    gap: 10px; /* Compact gap */
-    align-items: center; /* Center everything */
+    gap: 10px;
+    align-items: center;
   }
 
   /* When hidden, it actually disappears (handled by base .hidden) */
@@ -1266,12 +1334,76 @@ body.edit-mode .saved-item {
     display: none !important;
   }
 
+  .slider-wrapper {
+    height: 120px;
+    width: 100%;
+    margin: 10px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+  }
+
   .modal-slider {
-    /* Vertical Slider in Landscape */
     transform: rotate(-90deg);
     width: 85px;
     height: 10px;
-    margin: 50px 0; /* scaled margin */
+    margin: 0;
+    transform-origin: center;
+  }
+
+  /* Landscape Presets - positioned to LEFT of slider track */
+  .cell-presets {
+    position: absolute;
+    width: 30px;
+    height: 85px; /* Match slider visual height */
+    left: calc(50% - 52px); /* Just left of slider */
+    top: 50%;
+    transform: translateY(-50%);
+    display: block;
+    pointer-events: auto;
+  }
+
+  .preset-mark {
+    position: absolute;
+    transform: translateY(50%);
+    right: 0; /* Align to right edge of container */
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1;
+    color: var(--text-main);
+    cursor: pointer;
+    pointer-events: auto;
+    text-align: right;
+    font-family: "VT323", monospace;
+  }
+
+  .preset-mark::before {
+    content: "";
+    display: none;
+  }
+
+  .preset-mark::after {
+    content: "";
+    display: none;
+  }
+
+  /* Position presets - spread out evenly to prevent overlap */
+  .preset-mark[data-val="8"] {
+    bottom: 5%;
+    left: auto;
+  }
+  .preset-mark[data-val="16"] {
+    bottom: 25%;
+    left: auto;
+  }
+  .preset-mark[data-val="32"] {
+    bottom: 50%;
+    left: auto;
+  }
+  .preset-mark[data-val="64"] {
+    bottom: 75%;
+    left: auto;
   }
 
   .input-row {
