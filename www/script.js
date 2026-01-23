@@ -2395,13 +2395,33 @@ if (applyPreviewBtn) {
 }
 
 if (themeBtn) {
-  themeBtn.onclick = () => {
+  themeBtn.onclick = (e) => {
+    e.stopPropagation();
     renderThemeOptions();
     themeModal.classList.add("show");
   };
 }
-document.querySelector(".close").onclick = () =>
-  themeModal.classList.remove("show");
+
+document.addEventListener("click", (e) => {
+  if (themeModal.classList.contains("show")) {
+    const modalContent = themeModal.querySelector(".modal-content");
+    // If click is outside the modal content AND not on the toggle button
+    // Note: themeModal is the wrapper/backdrop, modal-content is the card
+    // detecting click on backdrop vs content
+    if (
+      modalContent &&
+      !modalContent.contains(e.target) &&
+      e.target !== themeBtn
+    ) {
+      themeModal.classList.remove("show");
+    }
+  }
+});
+
+if (document.querySelector(".close")) {
+  document.querySelector(".close").onclick = () =>
+    themeModal.classList.remove("show");
+}
 
 function createThemeCard(theme, isCustom) {
   const themeCard = document.createElement("div");
