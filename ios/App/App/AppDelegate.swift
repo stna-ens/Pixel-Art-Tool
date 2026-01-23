@@ -2,13 +2,29 @@ import UIKit
 import Capacitor
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UIPencilInteractionDelegate {
 
     var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        // Setup Pencil Interaction
+        DispatchQueue.main.async {
+            if let rvc = self.window?.rootViewController {
+                let interaction = UIPencilInteraction()
+                interaction.delegate = self
+                interaction.isEnabled = true
+                rvc.view.addInteraction(interaction)
+            }
+        }
         return true
+    }
+
+    // MARK: - UIPencilInteractionDelegate
+    func pencilInteractionDidTap(_ interaction: UIPencilInteraction) {
+        if let rvc = window?.rootViewController as? CAPBridgeViewController {
+            // Notify Web Layer
+            rvc.bridge?.triggerJSEvent(eventName: "pencilDoubleTap", target: "window")
+        }
     }
 
     func applicationWillResignActive(_ application: UIApplication) {

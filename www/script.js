@@ -3,6 +3,9 @@ let isErasing = false;
 let isFilling = false;
 let currentColor = "#000000";
 let lastStylusTime = 0;
+let lastPenTapTime = 0;
+let lastPenTapX = 0;
+let lastPenTapY = 0;
 let historyStack = [];
 let currentStroke = []; // Stores { layerId, x, y, prevColor, prevPercent, newColor, newPercent }
 const MAX_HISTORY = 50;
@@ -430,6 +433,31 @@ function AttachContainerListenersFunc() {
     if (e.button !== 0 && e.pointerType === "mouse") return;
 
     e.preventDefault();
+
+    // DOUBLE TAP DETECTION FOR PEN
+    if (e.pointerType === "pen") {
+      const now = Date.now();
+      const dist = Math.hypot(e.clientX - lastPenTapX, e.clientY - lastPenTapY);
+
+      if (now - lastPenTapTime < 300 && dist < 20) {
+        // Double Tap Detected!
+        // Toggle Eraser
+        toggleEraser();
+
+        // Prevent drawing a dot for this tap?
+        // We set isDrawing false so it stops immediately?
+        // Or we just let it be. But usually double tap is "gesture".
+        // Let's prevent default action (drawing) for this specific tap
+        isDrawing = false;
+        lastPenTapTime = 0; // Reset
+        return;
+      }
+
+      lastPenTapTime = now;
+      lastPenTapX = e.clientX;
+      lastPenTapY = e.clientY;
+    }
+
     isDrawing = true;
     currentStroke = [];
     container.setPointerCapture(e.pointerId);
@@ -1209,23 +1237,50 @@ const undoBtn = document.getElementById("undoBtn");
 if (undoBtn) undoBtn.onclick = undo;
 
 // Reset
+function resetCanvas() {
+  // Clear all layers
+  layers.forEach((l) => {
+    l.matrix.forEach((row) => {
+      row.forEach((c) => {
+        c.color = "transparent";
+        c.percent = 0;
+      });
+    });
+    l.ctx.clearRect(0, 0, l.canvas.width, l.canvas.height);
+    updateLayerPreview(layers.indexOf(l));
+  });
+  historyStack = [];
+}
+
 const resetBtn = document.getElementById("resetBtn");
 if (resetBtn) {
-  resetBtn.addEventListener("click", () => {
-    // Clear all layers or just active? Legacy: "querySelectorAll('.cell')" -> All.
-    layers.forEach((l) => {
-      l.matrix.forEach((row) => {
-        row.forEach((c) => {
-          c.color = "transparent";
-          c.percent = 0;
-        });
-      });
-      l.ctx.clearRect(0, 0, l.canvas.width, l.canvas.height);
-      updateLayerPreview(layers.indexOf(l));
-    });
-    historyStack = [];
-  });
+  resetBtn.addEventListener("click", resetCanvas);
 }
+
+function toggleEraser() {
+  const eraserBtn = document.getElementById("eraserBtn");
+  const fillBtn = document.getElementById("fillBtn");
+
+  isErasing = !isErasing;
+
+  if (isErasing) {
+    // Activated Eraser
+    if (eraserBtn) eraserBtn.classList.add("active");
+
+    // Disable Fill
+    isFilling = false;
+    if (fillBtn) fillBtn.classList.remove("active");
+  } else {
+    // Deactivated Eraser (Back to Brush)
+    if (eraserBtn) eraserBtn.classList.remove("active");
+  }
+}
+
+// Native Hardware Event Listener (iOS/Android)
+window.addEventListener("pencilDoubleTap", () => {
+  console.log("Hardware Double Tap Detected");
+  toggleEraser();
+});
 
 // Cell Count
 const changeGridNumberBtn = document.getElementById("changeGridNumber");
@@ -3012,3 +3067,116 @@ if (renameThemeInput) {
     }
   };
 }
+
+// --- KEYBOARD SHORTCUTS ---
+document.addEventListener("keydown", (e) => {
+  // Ignore shortcuts when typing in an input field
+  if (
+    e.target.tagName === "INPUT" ||
+    e.target.tagName === "TEXTAREA" ||
+    e.target.isContentEditable
+  ) {
+    return;
+  }
+
+  const key = e.key.toLowerCase();
+
+  switch (key) {
+    case "l": // Layers
+      e.preventDefault();
+      const layersPanel = document.getElementById("layersPanel");
+      if (layersPanel) {
+        layersPanel.classList.toggle("hidden");
+        layersPanel.classList.toggle("active");
+      }
+      break;
+
+    case "t": // Themes
+      e.preventDefault();
+      const themeModalEl = document.getElementById("themeModal");
+      if (themeModalEl && themeModalEl.classList.contains("show")) {
+        themeModalEl.classList.remove("show");
+      } else {
+        const themeBtnEl = document.getElementById("themeBtn");
+        if (themeBtnEl) themeBtnEl.click();
+      }
+      break;
+
+    case "e": // Eraser
+      e.preventDefault();
+      toggleEraser();
+      break;
+
+    case "f": // Fill
+      e.preventDefault();
+      const fillBtn = document.getElementById("fillBtn");
+      if (fillBtn) fillBtn.click();
+      break;
+
+    case "c": // Cell Count
+      e.preventDefault();
+      const cellCountPanel = document.getElementById("cellCountPanel");
+      if (cellCountPanel) {
+        cellCountPanel.classList.toggle("hidden");
+        document.body.classList.toggle("cell-panel-open");
+      }
+      break;
+
+    case "r": // Reset
+      e.preventDefault();
+      const resetBtnEl = document.getElementById("resetBtn");
+      if (resetBtnEl) {
+        // Trigger visual press animation
+        resetBtnEl.classList.add("active");
+        setTimeout(() => resetBtnEl.classList.remove("active"), 150);
+      }
+      resetCanvas();
+      break;
+
+    case "s": // Save
+      e.preventDefault();
+      saveDraft();
+      break;
+
+    case "tab": // Mode Switch
+      e.preventDefault();
+      // Toggle between progressive and instant
+      if (drawingMode === "progressive") {
+        drawingMode = "instant";
+      } else {
+        drawingMode = "progressive";
+      }
+      // Update UI
+      const modeSwitch = document.getElementById("drawModeSwitch");
+      if (modeSwitch) {
+        modeSwitch.querySelectorAll(".mode-option").forEach((opt) => {
+          opt.classList.remove("active");
+          if (drawingMode === "instant" && opt.innerText.includes("INST")) {
+            opt.classList.add("active");
+          } else if (
+            drawingMode === "progressive" &&
+            opt.innerText.includes("PROG")
+          ) {
+            opt.classList.add("active");
+          }
+        });
+      }
+      break;
+
+    case "enter": // Export
+      e.preventDefault();
+      const exportMainBtn = document.getElementById("exportMainBtn");
+      if (exportMainBtn) exportMainBtn.click();
+      break;
+  }
+});
+
+// Middle Mouse Click for Color Picker
+document.addEventListener("auxclick", (e) => {
+  if (e.button === 1) {
+    // Middle mouse button
+    e.preventDefault();
+    const colorPicker = document.getElementById("colorPicker");
+    if (colorPicker) colorPicker.click();
+  }
+});

@@ -430,6 +430,13 @@ button:active,
   border-color: #000;
 }
 
+#resetBtn.active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+  background-color: #ff5555;
+  color: white;
+}
+
 #colorPicker {
   -webkit-appearance: none;
   -moz-appearance: none;
