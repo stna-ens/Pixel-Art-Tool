@@ -407,6 +407,16 @@ button:active,
   box-shadow: inset 3px 3px 0px rgba(255, 255, 255, 0.3);
 }
 
+#fillBtn {
+  margin-top: 0;
+}
+
+#fillBtn.active {
+  background-color: var(--btn-active-bg);
+  color: var(--btn-active-text);
+  box-shadow: inset 3px 3px 0px rgba(255, 255, 255, 0.3);
+}
+
 #resetBtn {
   margin-top: 0;
   width: auto; /* Reset specific width */

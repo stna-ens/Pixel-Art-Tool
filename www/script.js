@@ -1,5 +1,6 @@
 let isDrawing = false;
 let isErasing = false;
+let isFilling = false;
 let currentColor = "#000000";
 let lastStylusTime = 0;
 let historyStack = [];
@@ -101,6 +102,9 @@ function handleColorChange(e) {
   isErasing = false;
   const eraserBtn = document.getElementById("eraserBtn");
   if (eraserBtn) eraserBtn.classList.remove("active");
+  isFilling = false;
+  const fillBtn = document.getElementById("fillBtn");
+  if (fillBtn) fillBtn.classList.remove("active");
 }
 
 function updateCachedColor() {
@@ -484,6 +488,13 @@ function handlePointerDraw(e) {
   if (gridX < 0 || gridX >= gridCount || gridY < 0 || gridY >= gridCount)
     return;
 
+  if (isFilling) {
+    if (e.type === "pointerdown") {
+      floodFill(gridX, gridY);
+    }
+    return;
+  }
+
   // Optimization: Don't redraw same cell in same drag event frame if logic determines it's redundant
   // However, for "progressive" mode, continuous holding might want to increase opacity?
   // Legacy script checked `target !== lastTouchedElement`.
@@ -504,6 +515,61 @@ document.addEventListener("pointerup", () => {
   lastGridX = -1;
   lastGridY = -1;
 });
+
+function floodFill(startX, startY) {
+  const layer = layers[activeLayerIndex];
+  if (!layer) return;
+
+  const targetColorCell = layer.matrix[startY][startX];
+  const targetColor =
+    targetColorCell.percent > 0 ? targetColorCell.color : "transparent";
+  const replacementColor = currentColor;
+
+  if (targetColor === replacementColor && targetColorCell.percent === 100)
+    return;
+
+  const queue = [[startX, startY]];
+  const seen = new Set();
+  const strokesForUndo = [];
+  const getHash = (x, y) => `${x},${y}`;
+
+  while (queue.length > 0) {
+    const [cx, cy] = queue.shift();
+    const key = getHash(cx, cy);
+    if (seen.has(key)) continue;
+    seen.add(key);
+
+    const cell = layer.matrix[cy][cx];
+    const cColor = cell.percent > 0 ? cell.color : "transparent";
+
+    if (cColor === targetColor) {
+      strokesForUndo.push({
+        x: cx,
+        y: cy,
+        prevColor: cell.color,
+        prevPercent: cell.percent,
+        newColor: replacementColor,
+        newPercent: 100,
+      });
+
+      updateMatrixAndCanvas(layer, cx, cy, replacementColor, 100);
+
+      if (cx > 0) queue.push([cx - 1, cy]);
+      if (cx < gridCount - 1) queue.push([cx + 1, cy]);
+      if (cy > 0) queue.push([cx, cy - 1]);
+      if (cy < gridCount - 1) queue.push([cx, cy + 1]);
+    }
+  }
+
+  if (strokesForUndo.length > 0) {
+    historyStack.push({
+      layerId: layer.id,
+      strokes: strokesForUndo,
+    });
+    if (historyStack.length > MAX_HISTORY) historyStack.shift();
+    updateLayerPreview(activeLayerIndex);
+  }
+}
 
 function drawPixelLogic(x, y) {
   const layer = layers[activeLayerIndex];
@@ -1116,7 +1182,21 @@ const eraserBtn = document.getElementById("eraserBtn");
 if (eraserBtn) {
   eraserBtn.onclick = () => {
     isErasing = !isErasing;
+    isFilling = false;
     eraserBtn.classList.toggle("active");
+    const fillBtn = document.getElementById("fillBtn");
+    if (fillBtn) fillBtn.classList.remove("active");
+  };
+}
+
+// Fill
+const fillBtn = document.getElementById("fillBtn");
+if (fillBtn) {
+  fillBtn.onclick = () => {
+    isFilling = !isFilling;
+    isErasing = false;
+    fillBtn.classList.toggle("active");
+    if (eraserBtn) eraserBtn.classList.remove("active");
   };
 }
 
