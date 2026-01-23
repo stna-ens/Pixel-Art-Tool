@@ -1214,6 +1214,16 @@ if (eraserBtn) {
     eraserBtn.classList.toggle("active");
     const fillBtn = document.getElementById("fillBtn");
     if (fillBtn) fillBtn.classList.remove("active");
+
+    // Update cursor
+    if (container) {
+      container.classList.remove("cursor-fill");
+      if (isErasing) {
+        container.classList.add("cursor-eraser");
+      } else {
+        container.classList.remove("cursor-eraser");
+      }
+    }
   };
 }
 
@@ -1225,6 +1235,16 @@ if (fillBtn) {
     isErasing = false;
     fillBtn.classList.toggle("active");
     if (eraserBtn) eraserBtn.classList.remove("active");
+
+    // Update cursor
+    if (container) {
+      container.classList.remove("cursor-eraser");
+      if (isFilling) {
+        container.classList.add("cursor-fill");
+      } else {
+        container.classList.remove("cursor-fill");
+      }
+    }
   };
 }
 
@@ -1270,9 +1290,20 @@ function toggleEraser() {
     // Disable Fill
     isFilling = false;
     if (fillBtn) fillBtn.classList.remove("active");
+
+    // Update cursor
+    if (container) {
+      container.classList.remove("cursor-fill");
+      container.classList.add("cursor-eraser");
+    }
   } else {
     // Deactivated Eraser (Back to Brush)
     if (eraserBtn) eraserBtn.classList.remove("active");
+
+    // Reset cursor
+    if (container) {
+      container.classList.remove("cursor-eraser");
+    }
   }
 }
 
