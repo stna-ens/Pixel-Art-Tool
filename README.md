@@ -12,7 +12,7 @@
 
 ## 🎨 The Philosophy
 I am a student who loves pixel art but hates modern software bloat.
-I noticed a problem: Mobile apps are full of ads, and desktop apps are too complex or expensive for casual use.
+I noticed a problem: Mobile apps are full of ads, they feel like a toy, and they have not so good interfaces that just demotivates you from the start. And desktop apps are too complex or expensive for casual users. As a result I wanted to build a simple, pretty looking, intuitive app that feels like actual software.
 
 **Pixy Studio** is my answer.
 It is built with a **"Zero-Dependency"** philosophy. No heavy frameworks, no tracking, no login walls. Just you and the grid.
