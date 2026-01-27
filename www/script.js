@@ -2825,23 +2825,26 @@ document.getElementById("exportProjectBtn")?.addEventListener("click", () => {
 });
 
 // Import Project Button & File Input (in export menu)
-const importProjectBtn = document.getElementById("importProjectBtn");
-const importFileInput = document.getElementById("importFileInput");
+document.addEventListener("DOMContentLoaded", () => {
+  const importProjectBtn = document.getElementById("importProjectBtn");
+  const importFileInput = document.getElementById("importFileInput");
+  const exportMenu = document.getElementById("exportMenu");
 
-if (importProjectBtn && importFileInput) {
-  importProjectBtn.onclick = () => {
-    importFileInput.click();
-    exportMenu.classList.add("hidden");
-  };
+  if (importProjectBtn && importFileInput) {
+    importProjectBtn.onclick = () => {
+      importFileInput.click();
+      if (exportMenu) exportMenu.classList.add("hidden");
+    };
 
-  importFileInput.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      importProject(file);
-      importFileInput.value = ""; // Reset for next import
-    }
-  };
-}
+    importFileInput.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        importProject(file);
+        importFileInput.value = ""; // Reset for next import
+      }
+    };
+  }
+});
 
 // Clipboard / Share helpers
 async function copyToClipboard(dataUrl) {
