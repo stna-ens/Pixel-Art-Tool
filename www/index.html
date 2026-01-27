@@ -198,34 +198,6 @@
         </button>
         <span class="title-text">Pixy</span>
         <div id="proBadge" class="pro-badge hidden">PRO</div>
-        <button
-          id="importHeaderBtn"
-          class="header-btn icon-btn"
-          title="Import Project"
-        >
-          <svg
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-            shape-rendering="crispEdges"
-          >
-            <!-- Retro Upload Icon (Opposite of download) -->
-            <!-- Tray Bottom -->
-            <rect fill="currentColor" x="5" y="19" width="14" height="2" />
-            <!-- Tray Sides -->
-            <rect fill="currentColor" x="5" y="17" width="2" height="2" />
-            <rect fill="currentColor" x="17" y="17" width="2" height="2" />
-            <!-- Arrow Shaft (pointing up) -->
-            <rect fill="currentColor" x="11" y="8" width="2" height="8" />
-            <!-- Arrow Head (pointing up) -->
-            <rect fill="currentColor" x="8" y="6" width="2" height="2" />
-            <rect fill="currentColor" x="14" y="6" width="2" height="2" />
-            <rect fill="currentColor" x="9" y="4" width="2" height="2" />
-            <rect fill="currentColor" x="13" y="4" width="2" height="2" />
-            <rect fill="currentColor" x="10" y="2" width="4" height="2" />
-          </svg>
-        </button>
-        <input type="file" id="importHeaderFileInput" style="display: none" />
         <button id="saveDraftBtn" class="header-btn">Save</button>
       </div>
       <div class="game-area">
@@ -272,13 +244,7 @@
     <div id="savedProjectsModal" class="saved-modal">
       <div class="saved-modal-header">
         <span>SAVED PROJECTS</span>
-        <div class="saved-modal-actions">
-          <button id="importProjectBtn" class="import-btn">Import</button>
-          <button class="close-saved-btn" onclick="toggleSavedModal()">
-            X
-          </button>
-        </div>
-        <input type="file" id="importFileInput" style="display: none" />
+        <button class="close-saved-btn" onclick="toggleSavedModal()">X</button>
       </div>
       <div id="mobileSavedList" class="saved-list-grid">
         <!-- JS will populate this -->
@@ -403,6 +369,8 @@
     <!-- Export Container -->
     <div class="export-container">
       <div id="exportMenu" class="export-menu hidden">
+        <button id="importProjectBtn">Import Project</button>
+        <input type="file" id="importFileInput" style="display: none" />
         <button id="exportProjectBtn">Export Project</button>
         <button id="exportStickerBtn">Export Sticker</button>
         <button id="exportPngBtn">Export PNG</button>

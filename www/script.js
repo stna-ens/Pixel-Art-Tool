@@ -2824,13 +2824,14 @@ document.getElementById("exportProjectBtn")?.addEventListener("click", () => {
   exportMenu.classList.add("hidden");
 });
 
-// Import Project Button & File Input (Modal)
+// Import Project Button & File Input (in export menu)
 const importProjectBtn = document.getElementById("importProjectBtn");
 const importFileInput = document.getElementById("importFileInput");
 
 if (importProjectBtn && importFileInput) {
   importProjectBtn.onclick = () => {
     importFileInput.click();
+    exportMenu.classList.add("hidden");
   };
 
   importFileInput.onchange = (e) => {
@@ -2838,24 +2839,6 @@ if (importProjectBtn && importFileInput) {
     if (file) {
       importProject(file);
       importFileInput.value = ""; // Reset for next import
-    }
-  };
-}
-
-// Header Import Button (for landscape devices)
-const importHeaderBtn = document.getElementById("importHeaderBtn");
-const importHeaderFileInput = document.getElementById("importHeaderFileInput");
-
-if (importHeaderBtn && importHeaderFileInput) {
-  importHeaderBtn.onclick = () => {
-    importHeaderFileInput.click();
-  };
-
-  importHeaderFileInput.onchange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      importProject(file);
-      importHeaderFileInput.value = ""; // Reset for next import
     }
   };
 }
