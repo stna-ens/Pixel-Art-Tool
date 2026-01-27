@@ -1150,7 +1150,7 @@ async function exportStickerToPhotos() {
 
 // --- PROJECT EXPORT/IMPORT ---
 
-function exportProject() {
+async function exportProject() {
   try {
     const savedLayers = layers.map((l) => {
       const flatData = [];
@@ -1180,25 +1180,40 @@ function exportProject() {
       .slice(0, 19);
     const filename = `pixy-project-${timestamp}.pixy`;
 
-    // Use native share if available, otherwise download
-    if (
-      navigator.share &&
-      navigator.canShare &&
-      navigator.canShare({ files: [new File([blob], filename)] })
-    ) {
-      navigator
-        .share({
-          files: [new File([blob], filename, { type: "application/json" })],
-          title: "Pixy Project",
-        })
-        .catch(() => {});
-    } else {
+    const triggerDownload = () => {
       const link = document.createElement("a");
       link.download = filename;
       link.href = URL.createObjectURL(blob);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    };
+
+    // Use native share if available, successfully
+    let shared = false;
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({ files: [new File([blob], filename)] })
+    ) {
+      try {
+        await navigator.share({
+          files: [new File([blob], filename, { type: "application/json" })],
+          title: "Pixy Project",
+        });
+        shared = true;
+      } catch (e) {
+        // Ignore AbortError (user cancelled), fallback for others if needed
+        if (e.name !== "AbortError") {
+          console.warn("Share failed, falling back to download", e);
+          triggerDownload();
+        }
+        return; // Don't trigger download below if we tried sharing
+      }
+    }
+
+    if (!shared) {
+      triggerDownload();
     }
 
     // Visual feedback
@@ -2803,32 +2818,45 @@ function renderThemeOptions() {
 }
 
 // Export Menu
-const exportMainBtn = document.getElementById("exportMainBtn");
-const exportMenu = document.getElementById("exportMenu");
-if (exportMainBtn) {
-  exportMainBtn.onclick = (e) => {
-    e.stopPropagation();
-    exportMenu.classList.toggle("hidden");
-  };
-}
-document.getElementById("exportPngBtn")?.addEventListener("click", () => {
-  exportCanvas(false, false);
-  exportMenu.classList.add("hidden");
-});
-document.getElementById("exportStickerBtn")?.addEventListener("click", () => {
-  exportStickerToPhotos();
-  exportMenu.classList.add("hidden");
-});
-document.getElementById("exportProjectBtn")?.addEventListener("click", () => {
-  exportProject();
-  exportMenu.classList.add("hidden");
-});
 
 // Import Project Button & File Input (in export menu)
 document.addEventListener("DOMContentLoaded", () => {
+  const exportMainBtn = document.getElementById("exportMainBtn");
+  const exportMenu = document.getElementById("exportMenu");
+
+  if (exportMainBtn && exportMenu) {
+    exportMainBtn.onclick = (e) => {
+      e.stopPropagation();
+      exportMenu.classList.toggle("hidden");
+    };
+  }
+
+  const btnProject = document.getElementById("exportProjectBtn");
+  if (btnProject) {
+    btnProject.onclick = () => {
+      exportProject();
+      if (exportMenu) exportMenu.classList.add("hidden");
+    };
+  }
+
+  const btnSticker = document.getElementById("exportStickerBtn");
+  if (btnSticker) {
+    btnSticker.onclick = () => {
+      exportStickerToPhotos();
+      if (exportMenu) exportMenu.classList.add("hidden");
+    };
+  }
+
+  const btnPng = document.getElementById("exportPngBtn");
+  if (btnPng) {
+    btnPng.onclick = () => {
+      exportCanvas(false, false);
+      if (exportMenu) exportMenu.classList.add("hidden");
+    };
+  }
+
   const importProjectBtn = document.getElementById("importProjectBtn");
   const importFileInput = document.getElementById("importFileInput");
-  const exportMenu = document.getElementById("exportMenu");
 
   if (importProjectBtn && importFileInput) {
     importProjectBtn.onclick = () => {
