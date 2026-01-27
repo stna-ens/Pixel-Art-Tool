@@ -1148,6 +1148,103 @@ async function exportStickerToPhotos() {
   }
 }
 
+// --- PROJECT EXPORT/IMPORT ---
+
+function exportProject() {
+  try {
+    const savedLayers = layers.map((l) => {
+      const flatData = [];
+      for (let y = 0; y < gridCount; y++) {
+        for (let x = 0; x < gridCount; x++) {
+          flatData.push(l.matrix[y][x]);
+        }
+      }
+      return {
+        name: l.name,
+        data: flatData,
+      };
+    });
+
+    const project = {
+      version: 2,
+      gridCount: gridCount,
+      layers: savedLayers,
+      exportedAt: new Date().toISOString(),
+    };
+
+    const jsonStr = JSON.stringify(project);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const timestamp = new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")
+      .slice(0, 19);
+    const filename = `pixy-project-${timestamp}.pixy`;
+
+    // Use native share if available, otherwise download
+    if (
+      navigator.share &&
+      navigator.canShare &&
+      navigator.canShare({ files: [new File([blob], filename)] })
+    ) {
+      navigator
+        .share({
+          files: [new File([blob], filename, { type: "application/json" })],
+          title: "Pixy Project",
+        })
+        .catch(() => {});
+    } else {
+      const link = document.createElement("a");
+      link.download = filename;
+      link.href = URL.createObjectURL(blob);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Visual feedback
+    const btn = document.getElementById("exportProjectBtn");
+    if (btn) {
+      const originalText = btn.textContent;
+      btn.textContent = "Exported!";
+      setTimeout(() => (btn.textContent = originalText), 1500);
+    }
+  } catch (e) {
+    console.error("Export project failed:", e);
+    alert("Export failed: " + e.message);
+  }
+}
+
+function importProject(file) {
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const project = JSON.parse(e.target.result);
+
+      // Validate structure
+      if (!project.version || !project.gridCount || !project.layers) {
+        throw new Error("Invalid project file format");
+      }
+
+      // Use existing loadDraft function
+      loadDraft(project);
+
+      // Close the saved modal if open
+      const savedProjectsModal = document.getElementById("savedProjectsModal");
+      if (savedProjectsModal) savedProjectsModal.classList.remove("active");
+
+      // Visual feedback
+      alert("Project imported successfully!");
+    } catch (err) {
+      console.error("Import project failed:", err);
+      alert("Import failed: " + err.message);
+    }
+  };
+
+  reader.readAsText(file);
+}
+
 // --- BOILERPLATE FOR UI (Re-paste of legacy UI logic for buttons) ---
 // I need to ensure all UI bindings from legacy script are present.
 
@@ -2722,6 +2819,46 @@ document.getElementById("exportStickerBtn")?.addEventListener("click", () => {
   exportStickerToPhotos();
   exportMenu.classList.add("hidden");
 });
+document.getElementById("exportProjectBtn")?.addEventListener("click", () => {
+  exportProject();
+  exportMenu.classList.add("hidden");
+});
+
+// Import Project Button & File Input (Modal)
+const importProjectBtn = document.getElementById("importProjectBtn");
+const importFileInput = document.getElementById("importFileInput");
+
+if (importProjectBtn && importFileInput) {
+  importProjectBtn.onclick = () => {
+    importFileInput.click();
+  };
+
+  importFileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      importProject(file);
+      importFileInput.value = ""; // Reset for next import
+    }
+  };
+}
+
+// Header Import Button (for landscape devices)
+const importHeaderBtn = document.getElementById("importHeaderBtn");
+const importHeaderFileInput = document.getElementById("importHeaderFileInput");
+
+if (importHeaderBtn && importHeaderFileInput) {
+  importHeaderBtn.onclick = () => {
+    importHeaderFileInput.click();
+  };
+
+  importHeaderFileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      importProject(file);
+      importHeaderFileInput.value = ""; // Reset for next import
+    }
+  };
+}
 
 // Clipboard / Share helpers
 async function copyToClipboard(dataUrl) {

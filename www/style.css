@@ -223,6 +223,23 @@ button:active,
   margin: 0;
 }
 
+#importHeaderBtn {
+  position: absolute;
+  /* Position to the left of the save button */
+  right: max(80px, env(safe-area-inset-right) + 80px);
+  top: 15px;
+  height: 44px;
+  width: 44px;
+  padding: 0;
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+  margin: 0;
+}
+
+#importHeaderBtn svg {
+  width: 24px;
+  height: 24px;
+}
+
 #openSavedBtn {
   display: none; /* Hidden by default, specifically enabled for Mobile Portrait */
   position: fixed;
@@ -285,6 +302,33 @@ button:active,
   align-items: center;
   justify-content: center;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+}
+
+.saved-modal-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.import-btn {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  height: 44px;
+  padding: 0 15px;
+  font-size: 20px;
+  border: 2px solid var(--btn-border);
+  box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
+}
+
+.import-btn:hover {
+  background: var(--btn-hover);
+}
+
+.import-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+  background: var(--btn-active-bg);
+  color: var(--btn-active-text);
 }
 
 .saved-list-grid {
