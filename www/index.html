@@ -78,7 +78,8 @@
       href="https://fonts.googleapis.com/css2?family=VT323&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css?v=2.3" />
+    <link rel="stylesheet" href="style.css?v=2.4" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <script>
       window.onerror = function (msg, source, lineno, colno, error) {
         // Alert for immediate visibility on stubborn mobile devices
@@ -198,6 +199,19 @@
         </button>
         <span class="title-text">Pixy</span>
         <div id="proBadge" class="pro-badge hidden">PRO</div>
+        <button id="accountBtn" class="header-btn account-btn" title="Account">
+          <svg viewBox="0 0 16 16" width="20" height="20" shape-rendering="crispEdges">
+            <rect fill="currentColor" x="5" y="1" width="6" height="1"/>
+            <rect fill="currentColor" x="4" y="2" width="1" height="1"/>
+            <rect fill="currentColor" x="11" y="2" width="1" height="1"/>
+            <rect fill="currentColor" x="4" y="3" width="8" height="4"/>
+            <rect fill="currentColor" x="5" y="7" width="6" height="1"/>
+            <rect fill="currentColor" x="2" y="9" width="12" height="1"/>
+            <rect fill="currentColor" x="1" y="10" width="14" height="1"/>
+            <rect fill="currentColor" x="1" y="11" width="14" height="3"/>
+            <rect fill="currentColor" x="2" y="14" width="12" height="1"/>
+          </svg>
+        </button>
         <button id="saveDraftBtn" class="header-btn">Save</button>
       </div>
       <div class="game-area">
@@ -497,6 +511,52 @@
       </svg>
     </button>
 
+    <!-- Auth Modal -->
+    <div id="authModal" class="theme-modal">
+      <div class="modal-content auth-content">
+        <span class="close-auth">&times;</span>
+        <h2 id="authTitle">SIGN IN</h2>
+        <div id="authForm">
+          <input type="email" id="authEmail" class="retro-input" placeholder="Email" autocomplete="email" />
+          <input type="password" id="authPassword" class="retro-input" placeholder="Password" autocomplete="current-password" />
+          <p id="authError" class="auth-error"></p>
+          <button id="authSubmitBtn" class="auth-submit-btn">SIGN IN</button>
+          <p class="auth-switch">
+            <span id="authSwitchText">Don't have an account?</span>
+            <button id="authSwitchBtn" class="auth-link-btn">SIGN UP</button>
+          </p>
+        </div>
+        <div id="authLoggedIn" class="auth-logged-in hidden">
+          <div class="auth-user-info">
+            <div class="auth-avatar">
+              <svg viewBox="0 0 16 16" width="48" height="48" shape-rendering="crispEdges">
+                <rect fill="currentColor" x="5" y="1" width="6" height="1"/>
+                <rect fill="currentColor" x="4" y="2" width="1" height="1"/>
+                <rect fill="currentColor" x="11" y="2" width="1" height="1"/>
+                <rect fill="currentColor" x="4" y="3" width="8" height="4"/>
+                <rect fill="currentColor" x="5" y="7" width="6" height="1"/>
+                <rect fill="currentColor" x="2" y="9" width="12" height="1"/>
+                <rect fill="currentColor" x="1" y="10" width="14" height="1"/>
+                <rect fill="currentColor" x="1" y="11" width="14" height="3"/>
+                <rect fill="currentColor" x="2" y="14" width="12" height="1"/>
+              </svg>
+            </div>
+            <p id="authUserEmail" class="auth-email"></p>
+            <div id="authProStatus" class="auth-pro-status"></div>
+          </div>
+          <div class="auth-license-section">
+            <h3 class="auth-license-title">ACTIVATE PRO</h3>
+            <div class="auth-license-row">
+              <input type="text" id="licenseKeyInput" class="retro-input" placeholder="Enter license key" />
+              <button id="activateLicenseBtn" class="auth-submit-btn">ACTIVATE</button>
+            </div>
+            <p id="licenseError" class="auth-error"></p>
+          </div>
+          <button id="authLogoutBtn" class="auth-submit-btn auth-logout-btn">LOG OUT</button>
+        </div>
+      </div>
+    </div>
+
     <!-- RevenueCat Paywall Modal -->
     <div id="paywallModal" class="theme-modal">
       <div class="modal-content paywall-content">
@@ -542,7 +602,7 @@
       </div>
     </div>
 
-    <script src="script.js?v=2.5"></script>
+    <script src="script.js?v=2.6"></script>
     <script>
       // Force unregister any legacy service workers
       try {

@@ -35,7 +35,8 @@ const API_KEY_ANDROID = "goog_PLACEHOLDER_KEY"; // REPLACE WITH REAL KEY
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
-  initRevenueCat(); // Start RC
+  initSupabase(); // Start Supabase Auth
+  initRevenueCat(); // Start RC (mobile only)
 });
 
 function initApp() {
@@ -1021,6 +1022,242 @@ document
       alert("Restore failed: " + e.message);
     }
   });
+
+// --- SUPABASE AUTH ---
+
+const SUPABASE_URL = "https://oqmpeeziymhqkoeydhuq.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_wbm38rk05IpQvq7_go6ziA_7s5-NWte";
+
+let supabaseClient = null;
+let currentUser = null;
+
+function initSupabase() {
+  if (!window.supabase) {
+    console.warn("Supabase SDK not loaded");
+    return;
+  }
+  supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Check for existing session
+  supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    if (session) {
+      currentUser = session.user;
+      onAuthStateChange(session.user);
+    }
+    updateAccountUI();
+  });
+
+  // Listen for auth changes
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if (session) {
+      currentUser = session.user;
+      onAuthStateChange(session.user);
+    } else {
+      currentUser = null;
+      isProUser = false;
+      updateProUI();
+    }
+    updateAccountUI();
+  });
+}
+
+async function onAuthStateChange(user) {
+  if (!user || !supabaseClient) return;
+
+  // Check pro status from profiles table
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("is_pro")
+    .eq("id", user.id)
+    .single();
+
+  if (error) {
+    console.warn("Profile fetch error:", error.message);
+    isProUser = false;
+  } else if (data) {
+    isProUser = data.is_pro;
+  }
+
+  updateProUI();
+}
+
+async function signUp(email, password) {
+  if (!supabaseClient) return { error: { message: "Auth not initialized" } };
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  return { data, error };
+}
+
+async function signIn(email, password) {
+  if (!supabaseClient) return { error: { message: "Auth not initialized" } };
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  return { data, error };
+}
+
+async function signOut() {
+  if (!supabaseClient) return;
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  isProUser = false;
+  updateProUI();
+  updateAccountUI();
+}
+
+function updateAccountUI() {
+  const btn = document.getElementById("accountBtn");
+  if (!btn) return;
+
+  if (currentUser) {
+    btn.classList.add("logged-in");
+  } else {
+    btn.classList.remove("logged-in");
+  }
+}
+
+// Auth Modal Logic
+function showAuthModal() {
+  const modal = document.getElementById("authModal");
+  if (!modal) return;
+
+  if (currentUser) {
+    // Show logged-in view
+    document.getElementById("authForm").classList.add("hidden");
+    document.getElementById("authLoggedIn").classList.remove("hidden");
+    document.getElementById("authUserEmail").textContent = currentUser.email;
+    document.getElementById("authProStatus").textContent = isProUser ? "PRO MEMBER" : "FREE ACCOUNT";
+    document.getElementById("authProStatus").className = "auth-pro-status " + (isProUser ? "pro" : "free");
+    document.getElementById("authTitle").textContent = "ACCOUNT";
+    // Hide license section if already Pro
+    const licenseSection = document.querySelector(".auth-license-section");
+    if (licenseSection) licenseSection.style.display = isProUser ? "none" : "block";
+  } else {
+    // Show sign-in form
+    document.getElementById("authForm").classList.remove("hidden");
+    document.getElementById("authLoggedIn").classList.add("hidden");
+    document.getElementById("authTitle").textContent = "SIGN IN";
+    document.getElementById("authError").textContent = "";
+  }
+
+  modal.classList.add("show");
+}
+
+let isSignUpMode = false;
+
+document.getElementById("accountBtn")?.addEventListener("click", showAuthModal);
+
+document.querySelector(".close-auth")?.addEventListener("click", () => {
+  document.getElementById("authModal").classList.remove("show");
+});
+
+document.getElementById("authSwitchBtn")?.addEventListener("click", () => {
+  isSignUpMode = !isSignUpMode;
+  document.getElementById("authTitle").textContent = isSignUpMode ? "SIGN UP" : "SIGN IN";
+  document.getElementById("authSubmitBtn").textContent = isSignUpMode ? "SIGN UP" : "SIGN IN";
+  document.getElementById("authSwitchText").textContent = isSignUpMode ? "Already have an account?" : "Don't have an account?";
+  document.getElementById("authSwitchBtn").textContent = isSignUpMode ? "SIGN IN" : "SIGN UP";
+  document.getElementById("authError").textContent = "";
+});
+
+document.getElementById("authSubmitBtn")?.addEventListener("click", async () => {
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const errorEl = document.getElementById("authError");
+
+  if (!email || !password) {
+    errorEl.textContent = "Please fill in all fields.";
+    return;
+  }
+
+  if (password.length < 6) {
+    errorEl.textContent = "Password must be at least 6 characters.";
+    return;
+  }
+
+  const btn = document.getElementById("authSubmitBtn");
+  btn.disabled = true;
+  btn.textContent = "LOADING...";
+  errorEl.textContent = "";
+
+  let result;
+  if (isSignUpMode) {
+    result = await signUp(email, password);
+  } else {
+    result = await signIn(email, password);
+  }
+
+  btn.disabled = false;
+  btn.textContent = isSignUpMode ? "SIGN UP" : "SIGN IN";
+
+  if (result.error) {
+    errorEl.textContent = result.error.message;
+  } else if (isSignUpMode) {
+    errorEl.style.color = "var(--btn-active-bg)";
+    errorEl.textContent = "Check your email to confirm your account!";
+  } else {
+    // Signed in successfully
+    document.getElementById("authModal").classList.remove("show");
+    document.getElementById("authEmail").value = "";
+    document.getElementById("authPassword").value = "";
+  }
+});
+
+document.getElementById("authLogoutBtn")?.addEventListener("click", async () => {
+  await signOut();
+  document.getElementById("authModal").classList.remove("show");
+});
+
+// License Key Activation
+document.getElementById("activateLicenseBtn")?.addEventListener("click", async () => {
+  const keyInput = document.getElementById("licenseKeyInput");
+  const errorEl = document.getElementById("licenseError");
+  const btn = document.getElementById("activateLicenseBtn");
+  const key = keyInput.value.trim();
+
+  if (!key) {
+    errorEl.textContent = "Please enter a license key.";
+    return;
+  }
+
+  if (!supabaseClient || !currentUser) {
+    errorEl.textContent = "You must be signed in.";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "ACTIVATING...";
+  errorEl.textContent = "";
+  errorEl.style.color = "#ff4444";
+
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const response = await fetch("/api/activate-license", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + session.access_token,
+      },
+      body: JSON.stringify({ licenseKey: key }),
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      isProUser = true;
+      updateProUI();
+      keyInput.value = "";
+      errorEl.style.color = "var(--btn-active-bg)";
+      errorEl.textContent = "Pro activated!";
+      document.getElementById("authProStatus").textContent = "PRO MEMBER";
+      document.getElementById("authProStatus").className = "auth-pro-status pro";
+    } else {
+      errorEl.textContent = result.error || "Activation failed.";
+    }
+  } catch (e) {
+    errorEl.textContent = "Network error. Try again.";
+  }
+
+  btn.disabled = false;
+  btn.textContent = "ACTIVATE";
+});
 
 // --- HELPER FUNCS ---
 
