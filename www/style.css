@@ -151,11 +151,14 @@ button:active,
   z-index: 10;
 }
 
-.title-text {
-  /* Ensure title stays centered even with side buttons */
+.title-wrapper {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  display: inline-block;
+}
+
+.title-text {
   text-align: center;
   /* BOLDER & EYE-CATCHING VIBE */
   font-size: 52px; /* Bigger */
@@ -1883,11 +1886,6 @@ input[type="number"] {
 }
 
 /* --- REVENUECAT & PAYWALL --- */
-
-.title-wrapper {
-  position: relative;
-  display: inline-block;
-}
 
 /* Pro Badge */
 .pro-badge {
