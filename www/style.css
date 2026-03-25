@@ -146,25 +146,24 @@ button:active,
   padding: 5px 12px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  position: relative;
   z-index: 10;
 }
 
-/* Center group: absolutely centered — width determined by title only */
+/* Center group: centered on viewport using vw units (immune to container width quirks) */
 .header-center {
   position: absolute;
-  left: 50%;
+  left: 50vw;
   transform: translateX(-50%);
   pointer-events: none;
 }
 
-/* Right group: account + save buttons */
+/* Right group: account + save buttons — pushed to the right */
 .header-right {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .title-text {
