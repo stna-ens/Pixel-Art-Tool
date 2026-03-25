@@ -72,7 +72,7 @@ export async function onRequestPost(context) {
     });
   }
 
-  const SUPABASE_URL = env.SUPABASE_URL;
+  const SUPABASE_URL = env.SUPABASE_URL || "https://oqmpeeziymhqkoeydhuq.supabase.co";
   const SUPABASE_SERVICE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
 
   // Find user by email

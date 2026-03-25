@@ -63,7 +63,7 @@ export async function onRequestPost(context) {
     }
 
     // License is valid — get user ID from Supabase JWT
-    const SUPABASE_URL = context.env.SUPABASE_URL;
+    const SUPABASE_URL = context.env.SUPABASE_URL || "https://oqmpeeziymhqkoeydhuq.supabase.co";
     const SUPABASE_SERVICE_KEY = context.env.SUPABASE_SERVICE_ROLE_KEY;
 
     if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
