@@ -1884,23 +1884,26 @@ input[type="number"] {
 
 /* --- REVENUECAT & PAYWALL --- */
 
+.title-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 /* Pro Badge */
 .pro-badge {
   background: #ffd700;
-  color: #000; /* Black text for contrast */
+  color: #000;
   font-size: 14px;
   padding: 2px 5px;
   border: 2px solid #000;
   font-weight: bold;
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
-  
-  /* Absolute Positioning to sit at bottom right of Pixy logo */
-  position: absolute;
-  left: 50%;
-  margin-left: 65px; /* Push past the Pixy text */
-  bottom: 0px; /* Push to the bottom */
 
-  animation: shine 3s infinite; /* Optional: Simple attention getter */
+  position: absolute;
+  bottom: -4px;
+  right: -44px;
+
+  animation: shine 3s infinite;
 }
 
 @keyframes shine {
