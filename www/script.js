@@ -2322,7 +2322,6 @@ const defaultThemes = {
   gtaViceCity: {
     name: "GTA Vice City",
     id: "gtaViceCity",
-    isPremium: true, // PRO FEATURE
     colors: {
       "--bg-main": "#ff6ec7",
       "--bg-container": "#1a0a2e",
@@ -2994,10 +2993,6 @@ function createThemeCard(theme, isCustom) {
   }
 
   themeCard.onclick = () => {
-    if (theme.isPremium && !isProUser) {
-      showPaywall("This theme is for Pro users!");
-      return;
-    }
     applyTheme(theme.colors);
     activeThemeId = theme.id;
     try {
@@ -3284,7 +3279,11 @@ saveCustomBtn.onclick = () => {
     // Update existing
     id = editingThemeId;
   } else {
-    // Create new
+    // Create new — Pro only
+    if (!isProUser) {
+      showPaywall("Custom Themes is a Pro Feature!");
+      return;
+    }
     id = `custom_${Date.now()}`;
   }
 
