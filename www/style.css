@@ -355,26 +355,62 @@ button:active,
     height: 60px;
   }
 
-  /* Slim header — title shrinks, badge fits inline */
+  /* ─── Header: CSS Grid layout — eliminates all absolute-position conflicts ─── */
   .header {
-    margin-bottom: 6px;
-    padding: 4px 12px;
+    display: grid;
+    grid-template-columns: 44px 1fr auto 44px 60px;
+    align-items: center;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    gap: 6px;
+  }
+
+  #undoBtn {
+    position: static;
+    top: auto;
+    left: auto;
+    width: 44px;
+    height: 44px;
   }
 
   .title-text {
-    font-size: 32px;
-    letter-spacing: 3px;
-    -webkit-text-stroke: 1.5px var(--text-main);
+    position: static;
+    left: auto;
+    transform: none;
+    font-size: 38px;
+    letter-spacing: 4px;
+    -webkit-text-stroke: 2px var(--text-main);
+    text-align: center;
   }
 
-  /* Badge fits inline to the right of smaller title */
+  /* PRO badge sits naturally between title and account button */
   .pro-badge {
-    left: calc(50% + 46px);
-    top: 50%;
+    position: static;
+    left: auto;
+    top: auto;
     bottom: auto;
-    transform: translateY(-50%);
+    transform: none;
     font-size: 11px;
-    padding: 1px 4px;
+    padding: 2px 4px;
+    animation: none;
+    white-space: nowrap;
+  }
+
+  .account-btn {
+    position: static;
+    right: auto;
+    top: auto;
+    width: 44px;
+    height: 44px;
+  }
+
+  #saveDraftBtn {
+    position: static;
+    right: auto;
+    top: auto;
+    height: 44px;
+    font-size: 18px;
+    padding: 0 8px;
   }
 
   /* Prevent space-between from creating huge gaps on tall phones */
@@ -382,7 +418,7 @@ button:active,
     justify-content: flex-start;
   }
 
-  /* Single scrollable tool row instead of wrapping grid */
+  /* Single scrollable tool row */
   .tools {
     flex-wrap: nowrap;
     overflow-x: auto;
@@ -400,8 +436,9 @@ button:active,
 
   .tools button {
     flex-shrink: 0;
-    font-size: 13px;
-    padding: 8px 12px;
+    font-size: 16px;
+    padding: 0 14px;
+    height: 44px;
     white-space: nowrap;
   }
 }
