@@ -372,10 +372,19 @@ button:active,
     -webkit-text-stroke: 2px var(--text-main);
   }
 
+  /* Remove PRO badge from flex flow — float it as a corner overlay on the title */
+  .header-center {
+    position: relative;
+  }
+
   .pro-badge {
-    font-size: 11px;
-    padding: 2px 4px;
+    position: absolute;
+    bottom: -8px;
+    right: -2px;
+    font-size: 9px;
+    padding: 1px 3px;
     animation: none;
+    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
   }
 
   .header-right {
