@@ -1690,6 +1690,11 @@ if (cellCountPanel) {
 
   applyCellCountBtn.onclick = () => {
     let gridNumber = parseInt(cellNumberInput.value) || 16;
+    const freeSizes = [8, 16, 32, 64];
+    if (!isProUser && !freeSizes.includes(gridNumber)) {
+      showPaywall("Custom Cell Counts is a Pro Feature!");
+      return;
+    }
     createGrid(gridNumber);
     toggleCellCountPanel();
   };
