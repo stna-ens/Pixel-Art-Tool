@@ -117,7 +117,7 @@ export async function onRequestPost(context) {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (e) {
-    return new Response(JSON.stringify({ error: "Server error" }), {
+    return new Response(JSON.stringify({ error: "Server error: " + (e?.message || String(e)) }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
