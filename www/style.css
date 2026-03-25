@@ -1900,7 +1900,8 @@ input[type="number"] {
 
   position: absolute;
   left: calc(50% + 72px); /* right edge of "Pixy" text */
-  bottom: 8px;
+  top: 50%;
+  transform: translateY(-50%);
 
   animation: shine 3s infinite;
 }
