@@ -357,7 +357,12 @@ button:active,
 
   /* Ensure Grid doesn't hit the Header */
   .header {
-    margin-bottom: 30px;
+    margin-bottom: 10px;
+  }
+
+  /* Prevent space-between from creating huge gaps on tall phones */
+  .content-wrapper {
+    justify-content: flex-start;
   }
 }
 
@@ -1894,7 +1899,7 @@ input[type="number"] {
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
 
   position: absolute;
-  left: calc(50% + 52px); /* right edge of "Pixy" text */
+  left: calc(50% + 72px); /* right edge of "Pixy" text */
   bottom: 8px;
 
   animation: shine 3s infinite;
