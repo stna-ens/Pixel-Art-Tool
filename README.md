@@ -1,84 +1,98 @@
-# 🎨 Pixy Studio
+# Pixy Studio
 
-### Free, browser-based pixel art editor.
-> **Built with Vanilla JS. No frameworks, no logins, no subscriptions.**
-
----
-
-# 👉 [pixystudio.app](https://pixystudio.app)
-
-<img width="1512" height="861" alt="Ekran Resmi 2026-01-23 22 37 53" src="https://github.com/user-attachments/assets/368d18c8-dfb7-48c7-9338-933c25aeb80a" />
-
+### The pixel art editor that works everywhere.
+> **Vanilla JS. No frameworks. Runs in your browser on any device.**
 
 ---
 
-## 💭 Why I Built This?
-I'm a student who just wanted to draw pixel art on my iPad.
+# [pixystudio.app](https://pixystudio.app)
 
-When I looked for apps, I had two choices:
-1.  **Pay a monthly subscription** (which I hate).
-2.  **Use free apps** that are full of ads and feel like broken toys because they usually aren't the best in terms of UI and UX.
-
-I wanted to build a completely free app that actually feels like software and doesn't make you pay every month to paint some artificial squares. So, I decided to build my own tool. **Pixy Studio** is the result of many sleepless nights. It's designed to be the tool *I* wanted to use: clean, fast, and respectful of the user.
+<img width="1512" height="861" alt="Pixy Studio" src="https://github.com/user-attachments/assets/368d18c8-dfb7-48c7-9338-933c25aeb80a" />
 
 ---
 
-## ⚡ How It Works (Universal)
-I didn't want to build separate apps for iPad, Mac, and Windows. Instead, I pushed the **modern web browser** to its limits.
+## Why I Built This
 
-Pixy Studio runs entirely on the client-side (in your browser), but it adapts to your device:
+I'm a student who wanted to draw pixel art on my iPad.
 
-* **On iPad:** It behaves like a native tablet app. I implemented **Apple Pencil pressure support**, palm rejection, and touch gestures (pinch-to-zoom, pan) so it feels natural.
-* **On Desktop:** It detects your mouse and keyboard, enabling shortcuts (Ctrl+Z, B, E, etc.) and precision cursor control.
-* **On Mobile:** The UI shrinks down for quick edits on the go.
+Every app I found was either paywalled behind a monthly subscription or free and riddled with ads. I wanted something clean, fast, and honest — so I built it myself.
 
----
-
-## 🛠️ Features
-I focused on the essentials. No bloat, just the tools you actually need to create game assets or art.
-
-### 🔹 Drawing Modes
-I have made 2 drawing modes that can be changed seamlessly:
-* **Instant Mode:** The classic experience. Pixels appear immediately as you draw, optimized for speed and traditional asset creation.
-* **Progressive Mode:** A more tactile and rhythmic drawing experience. It renders strokes with a progressive flow, providing better visual feedback and a more "organic" feel. It’s designed for artists who want to feel every pixel they place and maintain better control over their line weight.
-
-### 🔹 Layer System
-Yes, it has layers. You can:
-* Add, delete, and merge layers.
-* Toggle visibility to check your progress.
-* Move layers up and down.
-* *Technical Note:* Layers are rendered as separate off-screen canvases to keep performance high.
-
-### 🔹 The Tools
-* **Pen:** Standard pixel brush (Pressure sensitive on supported devices).
-* **Eraser:** Hard edge eraser.
-* **Bucket Fill:** Classic flood fill algorithm.
-
-### 🔹 Saving & Exporting
-* **Offline Mode (PWA):** You can install this as an app on your device. Once loaded, it works 100% offline.
-* **Local Storage:** Your current artwork is saved to your browser's IndexedDB.
-* **PNG Export:** Exports your art with a transparent background, ready for game engines like Unity or Godot.
+Pixy Studio is the result of many sleepless nights. It's designed to be the tool I actually wanted to use.
 
 ---
 
-## 🏗️ Tech Stack
-This project was a challenge to myself: **Can I build a complex app without React, Vue, or Angular?**
+## Free vs Pro
 
-The answer is yes.
-* **Core:** HTML5 Canvas API (2D Context)
-* **Logic:** Vanilla JavaScript (ES6 Modules)
-* **Styling:** CSS3 (Variables, Flexbox, Grid)
-* **Build:** Vite
-* **Deploy:** Cloudflare Pages
+Pixy is free to use. No ads, no nonsense. A one-time or monthly Pro upgrade unlocks the full toolkit for people who want to go deeper.
+
+| Feature | Free | Pro |
+|---|---|---|
+| Drawing tools (pen, eraser, fill) | Yes | Yes |
+| Layers (up to 3) | Yes | Yes |
+| Pre-built themes | Yes | Yes |
+| Standard grid sizes (8, 16, 32, 64) | Yes | Yes |
+| PNG export | Yes | Yes |
+| Unlimited layers | — | Yes |
+| Custom themes | — | Yes |
+| Any grid size | — | Yes |
+
+Pro is a one-time purchase or monthly subscription via [LemonSqueezy](https://pixystudio.lemonsqueezy.com). No recurring billing on the lifetime plan. Cancel monthly anytime.
 
 ---
 
-## 🚀 Trying it out
-You don't need to install anything. Just click the link below to open the editor in your browser.
+## Features
 
-**[Open Pixy Studio](https://pixystudio.app)**
+### Drawing Modes
+Two modes, switchable at any time:
+- **Instant Mode** — pixels appear immediately. Classic, fast, precise.
+- **Progressive Mode** — strokes render with flow. More tactile, better for detailed line work.
 
-## 🤝 Contributing
-I'm still learning and improving this. If you find a bug (which is possible!) or have an idea, feel free to open an issue.
+### Layer System
+- Add, delete, merge, reorder, toggle visibility
+- Each layer is a separate off-screen canvas — no performance penalty
 
-*Free for everyone.*
+### Tools
+- **Pen** — pressure sensitive on Apple Pencil
+- **Eraser** — hard edge
+- **Bucket Fill** — flood fill algorithm
+
+### Themes
+Curated built-in themes. Pro users can create and save fully custom themes.
+
+### Saving & Export
+- Auto-saves to IndexedDB in the browser
+- Export as PNG with transparent background (ready for Unity, Godot, etc.)
+- Save named snapshots to your gallery
+
+### Works Everywhere
+- **iPad** — Apple Pencil pressure, palm rejection, pinch-to-zoom
+- **Desktop** — keyboard shortcuts (Ctrl+Z, B, E, etc.), precision cursor
+- **Mobile** — touch-optimized UI
+
+---
+
+## Tech Stack
+
+A challenge to myself: build a complex creative tool with zero frameworks.
+
+- **Core:** HTML5 Canvas API (2D Context)
+- **Logic:** Vanilla JavaScript
+- **Styling:** CSS3 (Variables, Flexbox)
+- **Backend:** Cloudflare Pages Functions
+- **Auth & DB:** Supabase
+- **Payments:** LemonSqueezy
+- **Deploy:** Cloudflare Pages
+
+---
+
+## Try It
+
+No install needed. Open in your browser:
+
+**[pixystudio.app](https://pixystudio.app)**
+
+---
+
+## Contributing
+
+Find a bug or have an idea? Open an issue.
