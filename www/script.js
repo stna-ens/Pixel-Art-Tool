@@ -865,12 +865,6 @@ function loadLayerData(layer, dataArray) {
 
 // Same as legacy, but we need to ensure `applyTheme` calls `refreshThemeColors`
 function applyTheme(themeObj) {
-  // Check Premium Theme
-  if (themeObj.isPremium && !isProUser) {
-    showPaywall("This theme is for Pro users!");
-    return;
-  }
-
   for (const [key, value] of Object.entries(themeObj)) {
     document.documentElement.style.setProperty(key, value);
   }
@@ -3000,6 +2994,10 @@ function createThemeCard(theme, isCustom) {
   }
 
   themeCard.onclick = () => {
+    if (theme.isPremium && !isProUser) {
+      showPaywall("This theme is for Pro users!");
+      return;
+    }
     applyTheme(theme.colors);
     activeThemeId = theme.id;
     try {
