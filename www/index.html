@@ -602,7 +602,7 @@
       </div>
     </div>
 
-    <script src="script.js?v=2.7"></script>
+    <script>document.write('<script src="script.js?v=' + Date.now() + '"><\/script>');</script>
     <script>
       // Force unregister any legacy service workers
       try {
