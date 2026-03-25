@@ -151,14 +151,10 @@ button:active,
   z-index: 10;
 }
 
-.title-wrapper {
+.title-text {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  display: inline-block;
-}
-
-.title-text {
   text-align: center;
   /* BOLDER & EYE-CATCHING VIBE */
   font-size: 52px; /* Bigger */
@@ -1887,7 +1883,7 @@ input[type="number"] {
 
 /* --- REVENUECAT & PAYWALL --- */
 
-/* Pro Badge */
+/* Pro Badge — positioned in header, bottom-right of "Pixy" title */
 .pro-badge {
   background: #ffd700;
   color: #000;
@@ -1898,8 +1894,8 @@ input[type="number"] {
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
 
   position: absolute;
-  bottom: -4px;
-  right: -44px;
+  left: calc(50% + 52px); /* right edge of "Pixy" text */
+  bottom: 8px;
 
   animation: shine 3s infinite;
 }
