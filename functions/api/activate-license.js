@@ -66,6 +66,13 @@ export async function onRequestPost(context) {
     const SUPABASE_URL = context.env.SUPABASE_URL;
     const SUPABASE_SERVICE_KEY = context.env.SUPABASE_SERVICE_ROLE_KEY;
 
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+      return new Response(JSON.stringify({ error: "Server misconfigured: missing Supabase env vars" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     // Verify the JWT and get user
     const userResponse = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: {
