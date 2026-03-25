@@ -358,11 +358,20 @@ button:active,
   /* Ensure Grid doesn't hit the Header */
   .header {
     margin-bottom: 10px;
+    padding-bottom: 28px; /* room for PRO badge below title */
   }
 
   /* Prevent space-between from creating huge gaps on tall phones */
   .content-wrapper {
     justify-content: flex-start;
+  }
+
+  /* On mobile, show PRO badge centered below "Pixy" title */
+  .pro-badge {
+    left: 50%;
+    top: auto;
+    bottom: 4px;
+    transform: translateX(-50%);
   }
 }
 
@@ -1909,13 +1918,13 @@ input[type="number"] {
 @keyframes shine {
   0%,
   90% {
-    transform: translateY(0) scale(1);
+    transform: translateY(-50%) scale(1);
   }
   95% {
-    transform: translateY(-2px) scale(1.1);
+    transform: translateY(calc(-50% - 2px)) scale(1.1);
   }
   100% {
-    transform: translateY(0) scale(1);
+    transform: translateY(-50%) scale(1);
   }
 }
 
