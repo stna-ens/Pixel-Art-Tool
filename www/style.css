@@ -1964,11 +1964,11 @@ input[type="number"] {
 .pro-badge {
   position: absolute;
   bottom: -14px;
-  right: -4px;
+  right: -10px;
   background: #ffd700;
   color: #000;
-  font-size: 18px;
-  padding: 2px 8px;
+  font-size: 16px;
+  padding: 1px 6px;
   border: 2px solid #000;
   font-weight: bold;
   letter-spacing: 1px;
