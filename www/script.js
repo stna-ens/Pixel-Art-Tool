@@ -907,6 +907,8 @@ function initLemonSqueezy() {
           if (window.LemonSqueezy && window.LemonSqueezy.Url.Close) {
             window.LemonSqueezy.Url.Close();
           }
+          // Webhook updates Supabase async — poll until it's reflected
+          pollProStatus();
         }
       } catch (e) {
         // Not JSON, ignore
@@ -1026,6 +1028,25 @@ async function onAuthStateChange(user) {
   }
 
   updateProUI();
+}
+
+// After a successful purchase, poll Supabase until is_pro is reflected
+// (webhook may take a few seconds to process)
+async function pollProStatus(maxAttempts = 10, intervalMs = 2000) {
+  if (!supabaseClient || !currentUser) return;
+  for (let i = 0; i < maxAttempts; i++) {
+    await new Promise((r) => setTimeout(r, intervalMs));
+    const { data } = await supabaseClient
+      .from("profiles")
+      .select("is_pro")
+      .eq("id", currentUser.id)
+      .single();
+    if (data?.is_pro) {
+      isProUser = true;
+      updateProUI();
+      return;
+    }
+  }
 }
 
 async function signUp(email, password) {
