@@ -151,14 +151,11 @@ button:active,
   z-index: 10;
 }
 
-/* Center group: absolutely centered so it ignores left/right button widths */
+/* Center group: absolutely centered — width determined by title only */
 .header-center {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 8px;
   pointer-events: none;
 }
 
@@ -373,12 +370,11 @@ button:active,
     -webkit-text-stroke: 2px var(--text-main);
   }
 
-  /* PRO badge: small overlay on title, doesn't affect layout */
   .pro-badge {
     font-size: 9px;
-    padding: 1px 3px;
+    bottom: -8px;
+    right: -6px;
     animation: none;
-    box-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
   }
 
   .header-right {
@@ -1953,17 +1949,19 @@ input[type="number"] {
 
 /* --- REVENUECAT & PAYWALL --- */
 
-/* Pro Badge — inline next to "Pixy" title inside .header-center */
+/* Pro Badge — absolute bottom-right corner of the Pixy title */
 .pro-badge {
+  position: absolute;
+  bottom: -10px;
+  right: -8px;
   background: #ffd700;
   color: #000;
-  font-size: 14px;
-  padding: 2px 5px;
+  font-size: 12px;
+  padding: 1px 4px;
   border: 2px solid #000;
   font-weight: bold;
-  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
+  box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
   white-space: nowrap;
-  align-self: center;
   animation: shine 3s infinite;
 }
 
