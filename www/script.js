@@ -904,6 +904,9 @@ function initLemonSqueezy() {
           isProUser = true;
           updateProUI();
           document.getElementById("paywallModal").classList.remove("show");
+          if (window.LemonSqueezy && window.LemonSqueezy.Url.Close) {
+            window.LemonSqueezy.Url.Close();
+          }
         }
       } catch (e) {
         // Not JSON, ignore
@@ -1015,6 +1018,11 @@ async function onAuthStateChange(user) {
     isProUser = false;
   } else if (data) {
     isProUser = data.is_pro;
+  }
+
+  // Fallback to local storage if Supabase is_pro is false or missing
+  if (!isProUser && localStorage.getItem("pixy_pro_license")) {
+    isProUser = true;
   }
 
   updateProUI();
@@ -1141,6 +1149,9 @@ document.getElementById("authSubmitBtn")?.addEventListener("click", async () => 
 
 document.getElementById("authLogoutBtn")?.addEventListener("click", async () => {
   await signOut();
+  isProUser = false;
+  localStorage.removeItem("pixy_pro_license");
+  updateProUI();
   document.getElementById("authModal").classList.remove("show");
 });
 
@@ -1168,19 +1179,20 @@ document.getElementById("activateLicenseBtn")?.addEventListener("click", async (
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    const response = await fetch("/api/activate-license", {
+    const response = await fetch("/api/validate-license", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + session.access_token,
       },
-      body: JSON.stringify({ licenseKey: key }),
+      body: JSON.stringify({ license_key: key }),
     });
 
     const result = await response.json();
 
-    if (result.success) {
+    if (result.valid) {
       isProUser = true;
+      localStorage.setItem("pixy_pro_license", key);
       updateProUI();
       keyInput.value = "";
       errorEl.style.color = "var(--btn-active-bg)";
