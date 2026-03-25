@@ -144,26 +144,27 @@ button:active,
   letter-spacing: 2px;
   width: 100%;
   padding: 5px 12px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   z-index: 10;
 }
 
-/* Center group: centered on viewport using vw units (immune to container width quirks) */
+/* Center group: title + PRO badge */
 .header-center {
-  position: absolute;
-  left: 50vw;
-  transform: translateX(-50%);
-  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
-/* Right group: account + save buttons — pushed to the right */
+/* Right group: account + save buttons */
 .header-right {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
-  flex-shrink: 0;
-  margin-left: auto;
+  white-space: nowrap;
 }
 
 .title-text {
@@ -193,7 +194,7 @@ button:active,
   margin: 0;
   appearance: none;
   box-shadow: 4px 4px 0px rgba(0, 0, 0, 1);
-  flex-shrink: 0;
+  justify-self: start;
 }
 
 #undoBtn:hover {
