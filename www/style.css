@@ -355,10 +355,26 @@ button:active,
     height: 60px;
   }
 
-  /* Ensure Grid doesn't hit the Header */
+  /* Slim header — title shrinks, badge fits inline */
   .header {
-    margin-bottom: 10px;
-    padding-bottom: 28px; /* room for PRO badge below title */
+    margin-bottom: 6px;
+    padding: 4px 12px;
+  }
+
+  .title-text {
+    font-size: 32px;
+    letter-spacing: 3px;
+    -webkit-text-stroke: 1.5px var(--text-main);
+  }
+
+  /* Badge fits inline to the right of smaller title */
+  .pro-badge {
+    left: calc(50% + 46px);
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+    font-size: 11px;
+    padding: 1px 4px;
   }
 
   /* Prevent space-between from creating huge gaps on tall phones */
@@ -366,12 +382,27 @@ button:active,
     justify-content: flex-start;
   }
 
-  /* On mobile, show PRO badge centered below "Pixy" title */
-  .pro-badge {
-    left: 50%;
-    top: auto;
-    bottom: 4px;
-    transform: translateX(-50%);
+  /* Single scrollable tool row instead of wrapping grid */
+  .tools {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    gap: 8px;
+    padding: 6px 12px;
+    margin-top: 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .tools::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tools button {
+    flex-shrink: 0;
+    font-size: 13px;
+    padding: 8px 12px;
+    white-space: nowrap;
   }
 }
 
@@ -1918,13 +1949,13 @@ input[type="number"] {
 @keyframes shine {
   0%,
   90% {
-    transform: translateY(-50%) scale(1);
+    transform: translateY(-50%) scale(1) translateX(0);
   }
   95% {
-    transform: translateY(calc(-50% - 2px)) scale(1.1);
+    transform: translateY(calc(-50% - 2px)) scale(1.05) translateX(0);
   }
   100% {
-    transform: translateY(-50%) scale(1);
+    transform: translateY(-50%) scale(1) translateX(0);
   }
 }
 
