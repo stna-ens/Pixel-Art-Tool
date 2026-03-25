@@ -1200,18 +1200,18 @@ document.getElementById("activateLicenseBtn")?.addEventListener("click", async (
 
   try {
     const { data: { session } } = await supabaseClient.auth.getSession();
-    const response = await fetch("/api/validate-license", {
+    const response = await fetch("/api/activate-license", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer " + session.access_token,
       },
-      body: JSON.stringify({ license_key: key }),
+      body: JSON.stringify({ licenseKey: key }),
     });
 
     const result = await response.json();
 
-    if (result.valid) {
+    if (result.success) {
       isProUser = true;
       localStorage.setItem("pixy_pro_license", key);
       updateProUI();
