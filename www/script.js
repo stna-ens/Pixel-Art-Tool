@@ -26,17 +26,18 @@ let container = null;
 let bgCanvas = null; // Dedicated canvas for grid lines and background color
 let bgCtx = null;
 
-// RevenueCat State
+// Pro State
 let isProUser = false;
-const ENTITLEMENT_ID = "pro_access";
-const API_KEY_IOS = "appl_PLACEHOLDER_KEY"; // REPLACE WITH REAL KEY
-const API_KEY_ANDROID = "goog_PLACEHOLDER_KEY"; // REPLACE WITH REAL KEY
+
+// LemonSqueezy Checkout URLs
+const LS_MONTHLY_URL = "https://pixystudio.lemonsqueezy.com/checkout/buy/64c0ba55-ae8f-40c8-a4ca-be8b909b7cde";
+const LS_LIFETIME_URL = "https://pixystudio.lemonsqueezy.com/checkout/buy/0dba630b-5f1d-4215-85dc-b9f927f2d5bd";
 
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
   initApp();
   initSupabase(); // Start Supabase Auth
-  initRevenueCat(); // Start RC (mobile only)
+  initLemonSqueezy();
 });
 
 function initApp() {
@@ -878,57 +879,37 @@ function applyTheme(themeObj) {
   refreshThemeColors();
 }
 
-// --- REVENUECAT LOGIC ---
+// --- LEMONSQUEEZY LOGIC ---
 
-async function initRevenueCat() {
-  if (
-    !window.Capacitor ||
-    !window.Capacitor.Plugins ||
-    !window.Capacitor.Plugins.Purchases
-  ) {
-    console.warn("RevenueCat plugin not found (Web Mode?)");
-    return;
-  }
-
-  const { Purchases } = window.Capacitor.Plugins;
-
-  try {
-    const platform = (await window.Capacitor.Plugins.Device?.getInfo())
-      ?.platform;
-
-    let apiKey = "";
-    if (platform === "ios") apiKey = API_KEY_IOS;
-    else if (platform === "android") apiKey = API_KEY_ANDROID;
-
-    if (apiKey) {
-      await Purchases.configure({ apiKey });
-      await checkProStatus();
-    }
-
-    // Listen for updates
-    Purchases.addListener("purchasesReceived", (info) => {
-      handleCustomerInfo(info.customerInfo);
+function initLemonSqueezy() {
+  if (window.createLemonSqueezy) {
+    window.createLemonSqueezy();
+  } else {
+    // lemon.js loaded with defer, wait for it
+    document.addEventListener("DOMContentLoaded", () => {
+      if (window.createLemonSqueezy) window.createLemonSqueezy();
     });
-  } catch (e) {
-    console.error("RC Init Failed", e);
+    window.addEventListener("load", () => {
+      if (window.createLemonSqueezy) window.createLemonSqueezy();
+    });
   }
-}
 
-async function checkProStatus() {
-  try {
-    const { Purchases } = window.Capacitor.Plugins;
-    const info = await Purchases.getCustomerInfo();
-    handleCustomerInfo(info.customerInfo);
-  } catch (e) {
-    console.warn("Check Pro Status failed", e);
-  }
-}
-
-function handleCustomerInfo(customerInfo) {
-  const entitlements = customerInfo.entitlements.active;
-  isProUser = !!entitlements[ENTITLEMENT_ID];
-
-  updateProUI();
+  // Listen for successful purchases via LemonSqueezy events
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "https://app.lemonsqueezy.com") return;
+    if (typeof event.data === "string") {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === "Checkout.Success") {
+          isProUser = true;
+          updateProUI();
+          document.getElementById("paywallModal").classList.remove("show");
+        }
+      } catch (e) {
+        // Not JSON, ignore
+      }
+    }
+  });
 }
 
 function updateProUI() {
@@ -948,74 +929,38 @@ function updateProUI() {
 function showPaywall(msg) {
   const modal = document.getElementById("paywallModal");
   modal.classList.add("show");
-  if (msg) document.querySelector(".paywall-title").innerText = msg; // Dynamic title
-
-  loadOfferings();
+  if (msg) document.querySelector(".paywall-title").innerText = msg;
 }
 
-async function loadOfferings() {
-  try {
-    const { Purchases } = window.Capacitor.Plugins;
-    const offerings = await Purchases.getOfferings();
-
-    if (offerings.current) {
-      const monthly = offerings.current.monthly;
-      const yearly = offerings.current.annual;
-
-      if (monthly) {
-        document.getElementById("priceMonthly").innerText =
-          monthly.product.priceString;
-        document.getElementById("purchaseMonthlyBtn").onclick = () =>
-          purchasePackage(monthly);
-      }
-      if (yearly) {
-        document.getElementById("priceYearly").innerText =
-          yearly.product.priceString;
-        document.getElementById("purchaseYearlyBtn").onclick = () =>
-          purchasePackage(yearly);
-      }
-    }
-  } catch (e) {
-    console.error("Error loading offerings", e);
+function openLemonCheckout(url) {
+  // Append embed=1 for overlay mode, pass user email if available
+  const checkoutUrl = new URL(url);
+  checkoutUrl.searchParams.set("embed", "1");
+  if (currentUser?.email) {
+    checkoutUrl.searchParams.set("checkout[email]", currentUser.email);
   }
+
+  if (window.LemonSqueezy) {
+    window.LemonSqueezy.Url.Open(checkoutUrl.toString());
+  } else {
+    // Fallback: open in new tab if lemon.js didn't load
+    window.open(checkoutUrl.toString(), "_blank");
+  }
+
+  document.getElementById("paywallModal").classList.remove("show");
 }
 
-async function purchasePackage(rcPackage) {
-  try {
-    const { Purchases } = window.Capacitor.Plugins;
-    const { customerInfo } = await Purchases.purchasePackage({
-      package: rcPackage,
-    });
-    handleCustomerInfo(customerInfo);
-  } catch (e) {
-    if (!e.userCancelled) {
-      alert("Purchase failed: " + e.message);
-    }
-  }
-}
+document.getElementById("purchaseMonthlyBtn")?.addEventListener("click", () => {
+  openLemonCheckout(LS_MONTHLY_URL);
+});
+
+document.getElementById("purchaseLifetimeBtn")?.addEventListener("click", () => {
+  openLemonCheckout(LS_LIFETIME_URL);
+});
 
 document.querySelector(".close-paywall")?.addEventListener("click", () => {
   document.getElementById("paywallModal").classList.remove("show");
 });
-
-document
-  .getElementById("restorePurchasesBtn")
-  ?.addEventListener("click", async () => {
-    try {
-      const { Purchases } = window.Capacitor.Plugins;
-      const { customerInfo } = await Purchases.restorePurchases();
-      handleCustomerInfo(customerInfo);
-
-      if (customerInfo.entitlements.active[ENTITLEMENT_ID]) {
-        alert("Purchases restored!");
-        updateProUI();
-      } else {
-        alert("No Pro subscription found.");
-      }
-    } catch (e) {
-      alert("Restore failed: " + e.message);
-    }
-  });
 
 // --- SUPABASE AUTH ---
 

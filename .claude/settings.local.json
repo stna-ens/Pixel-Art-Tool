@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"isPremium\\\\|paywall\\\\|ENTITLEMENT\\\\|subscription\\\\|layer.*limit\\\\|3.*layer\" /Users/eneskis/Documents/Code/Pixy-main/Pixy/www/*.js)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(grep -r \"lemon\\\\|squeezy\\\\|checkout\\\\|stripe\\\\|paddle\\\\|gumroad\" /Users/eneskis/Documents/Code/Pixy-main/Pixy --include=*.js --include=*.html --include=*.json --exclude-dir=node_modules)"
+    ]
+  }
+}
