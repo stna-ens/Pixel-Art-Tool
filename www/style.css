@@ -380,8 +380,9 @@ button:active,
   }
 
   .pro-badge {
-    font-size: 10px;
-    padding: 1px 4px;
+    font-size: 13px;
+    padding: 1px 5px;
+    letter-spacing: 0px;
     bottom: -12px;
     right: -2px;
     animation: none;
@@ -1966,12 +1967,16 @@ input[type="number"] {
   right: -4px;
   background: #ffd700;
   color: #000;
-  font-size: 14px;
-  padding: 2px 6px;
+  font-size: 18px;
+  padding: 2px 8px;
   border: 2px solid #000;
   font-weight: bold;
+  letter-spacing: 1px;
   -webkit-text-stroke: 0;
-  text-shadow: none;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.5);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
   animation: shine 3s infinite;
