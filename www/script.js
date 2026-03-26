@@ -1051,7 +1051,11 @@ async function pollProStatus(maxAttempts = 10, intervalMs = 2000) {
 
 async function signUp(email, password) {
   if (!supabaseClient) return { error: { message: "Auth not initialized" } };
-  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  const { data, error } = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: "https://pixystudio.app" },
+  });
   return { data, error };
 }
 
