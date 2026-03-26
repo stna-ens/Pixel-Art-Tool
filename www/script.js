@@ -792,12 +792,16 @@ function saveDraft() {
       gridCount: gridCount,
       layers: savedLayers,
       thumbnail: thumbnail,
+      updated_at: new Date().toISOString(),
     };
 
     const saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
     saves.unshift(save);
     if (saves.length > 20) saves.pop();
     localStorage.setItem("pixy_saves", JSON.stringify(saves));
+
+    // Sync to Supabase for Pro users (non-blocking)
+    syncProjectToSupabase(save);
 
     renderSavedDrawings();
 
@@ -1028,6 +1032,11 @@ async function onAuthStateChange(user) {
   }
 
   updateProUI();
+
+  // Sync projects from cloud for Pro users
+  if (isProUser) {
+    mergeAndSync();
+  }
 }
 
 // After a successful purchase, poll Supabase until is_pro is reflected
@@ -1073,6 +1082,114 @@ async function signOut() {
   updateProUI();
   updateAccountUI();
 }
+
+// --- CLOUD SYNC (Pro feature) ---
+
+async function syncProjectToSupabase(save) {
+  if (!supabaseClient || !currentUser || !isProUser) return;
+  try {
+    const { error } = await supabaseClient
+      .from("projects")
+      .upsert(
+        {
+          id: save.id,
+          user_id: currentUser.id,
+          version: save.version || 2,
+          grid_count: save.gridCount,
+          layers: save.layers,
+          thumbnail: save.thumbnail,
+          updated_at: save.updated_at || new Date().toISOString(),
+        },
+        { onConflict: "id" },
+      );
+    if (error) console.warn("Sync push failed:", error.message);
+  } catch (e) {
+    console.warn("Sync push error:", e);
+  }
+}
+
+async function deleteProjectFromSupabase(projectId) {
+  if (!supabaseClient || !currentUser || !isProUser) return;
+  try {
+    await supabaseClient
+      .from("projects")
+      .delete()
+      .eq("id", projectId)
+      .eq("user_id", currentUser.id);
+  } catch (e) {
+    console.warn("Sync delete error:", e);
+  }
+}
+
+async function fetchRemoteProjects() {
+  if (!supabaseClient || !currentUser || !isProUser) return [];
+  try {
+    const { data, error } = await supabaseClient
+      .from("projects")
+      .select("*")
+      .eq("user_id", currentUser.id)
+      .order("updated_at", { ascending: false })
+      .limit(20);
+    if (error) {
+      console.warn("Fetch remote projects failed:", error.message);
+      return [];
+    }
+    return (data || []).map((row) => ({
+      id: row.id,
+      version: row.version,
+      gridCount: row.grid_count,
+      layers: row.layers,
+      thumbnail: row.thumbnail,
+      updated_at: row.updated_at,
+    }));
+  } catch (e) {
+    console.warn("Fetch remote error:", e);
+    return [];
+  }
+}
+
+async function mergeAndSync() {
+  if (!supabaseClient || !currentUser || !isProUser) return;
+
+  const localSaves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
+  const remoteSaves = await fetchRemoteProjects();
+
+  const localMap = new Map(localSaves.map((s) => [s.id, s]));
+  const remoteMap = new Map(remoteSaves.map((s) => [s.id, s]));
+
+  const merged = new Map();
+  const allIds = new Set([...localMap.keys(), ...remoteMap.keys()]);
+
+  for (const id of allIds) {
+    const local = localMap.get(id);
+    const remote = remoteMap.get(id);
+
+    if (local && !remote) {
+      merged.set(id, local);
+      syncProjectToSupabase(local);
+    } else if (!local && remote) {
+      merged.set(id, remote);
+    } else {
+      const localTime = new Date(local.updated_at || 0).getTime();
+      const remoteTime = new Date(remote.updated_at || 0).getTime();
+      if (localTime >= remoteTime) {
+        merged.set(id, local);
+        if (localTime > remoteTime) syncProjectToSupabase(local);
+      } else {
+        merged.set(id, remote);
+      }
+    }
+  }
+
+  const mergedArray = [...merged.values()]
+    .sort((a, b) => new Date(b.updated_at || 0) - new Date(a.updated_at || 0))
+    .slice(0, 20);
+
+  localStorage.setItem("pixy_saves", JSON.stringify(mergedArray));
+  renderSavedDrawings();
+}
+
+// --- ACCOUNT UI ---
 
 function updateAccountUI() {
   const btn = document.getElementById("accountBtn");
@@ -3235,6 +3352,7 @@ if (confirmDeleteBtn) {
       let saves = JSON.parse(localStorage.getItem("pixy_saves") || "[]");
       saves = saves.filter((s) => s.id !== pendingDeleteId);
       localStorage.setItem("pixy_saves", JSON.stringify(saves));
+      deleteProjectFromSupabase(pendingDeleteId);
       renderSavedDrawings();
       pendingDeleteId = null;
     }
