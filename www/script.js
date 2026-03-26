@@ -1012,10 +1012,10 @@ function initSupabase() {
 async function onAuthStateChange(user) {
   if (!user || !supabaseClient) return;
 
-  // Check pro status from profiles table
+  // Check pro status and theme from profiles table
   const { data, error } = await supabaseClient
     .from("profiles")
-    .select("is_pro")
+    .select("is_pro, theme_id")
     .eq("id", user.id)
     .single();
 
@@ -1024,6 +1024,8 @@ async function onAuthStateChange(user) {
     isProUser = false;
   } else if (data) {
     isProUser = data.is_pro;
+    // Restore theme from profile (cloud overrides local on sign-in)
+    if (data.theme_id) applyThemeById(data.theme_id);
   }
 
   // Fallback to local storage if Supabase is_pro is false or missing
@@ -1081,6 +1083,30 @@ async function signOut() {
   isProUser = false;
   updateProUI();
   updateAccountUI();
+}
+
+// --- THEME SYNC ---
+
+async function syncThemeToSupabase(themeId) {
+  if (!supabaseClient || !currentUser) return;
+  try {
+    await supabaseClient
+      .from("profiles")
+      .update({ theme_id: themeId })
+      .eq("id", currentUser.id);
+  } catch (e) {
+    console.warn("Theme sync error:", e);
+  }
+}
+
+function applyThemeById(id) {
+  const t = defaultThemes[id] || customThemes[id];
+  if (!t) return;
+  applyTheme(t.colors);
+  activeThemeId = id;
+  try {
+    localStorage.setItem("pixelArtThemeId", id);
+  } catch (e) {}
 }
 
 // --- CLOUD SYNC (Pro feature) ---
@@ -2937,6 +2963,18 @@ try {
   customThemes = JSON.parse(localStorage.getItem("customThemes") || "{}");
 } catch (e) {}
 
+// Restore last selected theme on startup
+try {
+  const savedThemeId = localStorage.getItem("pixelArtThemeId");
+  if (savedThemeId) {
+    activeThemeId = savedThemeId;
+    const t =
+      defaultThemes[savedThemeId] ||
+      customThemes[savedThemeId];
+    if (t) applyTheme(t.colors);
+  }
+} catch (e) {}
+
 const themeModal = document.getElementById("themeModal");
 const themeBtn = document.getElementById("themeBtn");
 const themePresetsContainer = document.querySelector(".theme-presets");
@@ -3104,6 +3142,7 @@ function createThemeCard(theme, isCustom) {
     } catch (e) {
       console.warn("Storage access denied", e);
     }
+    syncThemeToSupabase(activeThemeId);
 
     document
       .querySelectorAll(".theme-card")
