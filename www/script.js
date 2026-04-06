@@ -933,6 +933,11 @@ function updateProUI() {
     upgradeBtn.style.display = isProUser ? "none" : "";
   }
 
+  const upgradeBtnCanvas = document.getElementById("upgradeBtnCanvas");
+  if (upgradeBtnCanvas) {
+    upgradeBtnCanvas.style.display = isProUser ? "none" : "";
+  }
+
   // Close paywall if open and user just bought
   if (isProUser) {
     document.getElementById("paywallModal").classList.remove("show");
@@ -981,6 +986,10 @@ document.querySelector(".close-paywall")?.addEventListener("click", () => {
 });
 
 document.getElementById("upgradeBtn")?.addEventListener("click", () => {
+  showPaywall("Upgrade to Pro");
+});
+
+document.getElementById("upgradeBtnCanvas")?.addEventListener("click", () => {
   showPaywall("Upgrade to Pro");
 });
 

@@ -1945,6 +1945,22 @@ input[type="number"] {
     margin-top: 20px;
   }
 
+  /* Hide header upgrade button, show canvas one instead */
+  #upgradeBtn {
+    display: none;
+  }
+
+  .canvas-upgrade-btn {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: calc(50% - 46.5vmin);
+    height: 36px;
+    padding: 0 10px;
+    font-size: 16px;
+    z-index: 101;
+  }
+
   /* Reduce gap between header and grid */
   .container {
     margin-top: 0;
@@ -2128,6 +2144,11 @@ input[type="number"] {
 .upgrade-btn:active {
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0px rgba(0, 0, 0, 1);
+}
+
+/* Canvas upgrade button — mobile only */
+.canvas-upgrade-btn {
+  display: none;
 }
 
 /* --- Auth / Account --- */
