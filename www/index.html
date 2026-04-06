@@ -224,18 +224,20 @@
         <div id="drawingBoard" class="drawing-board">
           <!-- Drawing Mode Toggle Switch -->
           <!-- Drawing Mode Toggle Switch (Vertical/Blocky) -->
-          <button id="upgradeBtnCanvas" class="header-btn upgrade-btn canvas-upgrade-btn">PRO</button>
-          <div class="draw-mode-switch vertical-retro" id="drawModeSwitch">
-            <div
-              class="mode-option active"
-              data-mode="progressive"
-              title="Progressive Mode"
-            >
-              PROG
+          <div class="canvas-top-row">
+            <div class="draw-mode-switch vertical-retro" id="drawModeSwitch">
+              <div
+                class="mode-option active"
+                data-mode="progressive"
+                title="Progressive Mode"
+              >
+                PROG
+              </div>
+              <div class="mode-option" data-mode="instant" title="Instant Mode">
+                INST
+              </div>
             </div>
-            <div class="mode-option" data-mode="instant" title="Instant Mode">
-              INST
-            </div>
+            <button id="upgradeBtnCanvas" class="header-btn upgrade-btn canvas-upgrade-btn">PRO</button>
           </div>
           <div class="tools" id="tools">
             <button id="layersBtn">Layers</button>

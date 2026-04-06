@@ -1950,15 +1950,25 @@ input[type="number"] {
     display: none;
   }
 
+  .canvas-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 93vmin;
+    margin-bottom: 8px;
+  }
+
+  /* Remove margin from switch — wrapper handles it now */
+  .canvas-top-row .draw-mode-switch.vertical-retro {
+    margin-left: 0 !important;
+    margin-bottom: 0;
+  }
+
   .canvas-upgrade-btn {
     display: block;
-    position: absolute;
-    top: 0;
-    right: calc(50% - 46.5vmin);
     height: 36px;
     padding: 0 10px;
     font-size: 16px;
-    z-index: 101;
   }
 
   /* Reduce gap between header and grid */
@@ -1968,9 +1978,9 @@ input[type="number"] {
     height: 93vmin;
   }
 
-  /* Update switch alignment for larger grid */
-  .draw-mode-switch.vertical-retro {
-    margin-left: calc(50% - 46.5vmin);
+  /* Canvas top row width matches larger grid */
+  .canvas-top-row {
+    width: 93vmin;
   }
 }
 
