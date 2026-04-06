@@ -928,6 +928,11 @@ function updateProUI() {
     else badge.classList.add("hidden");
   }
 
+  const upgradeBtn = document.getElementById("upgradeBtn");
+  if (upgradeBtn) {
+    upgradeBtn.style.display = isProUser ? "none" : "";
+  }
+
   // Close paywall if open and user just bought
   if (isProUser) {
     document.getElementById("paywallModal").classList.remove("show");
@@ -942,12 +947,16 @@ function showPaywall(msg) {
 }
 
 function openLemonCheckout(url) {
-  // Append embed=1 for overlay mode, pass user email if available
+  if (!currentUser) {
+    document.getElementById("paywallModal").classList.remove("show");
+    document.getElementById("authModal").classList.add("show");
+    return;
+  }
+
+  // Append embed=1 for overlay mode, pass user email
   const checkoutUrl = new URL(url);
   checkoutUrl.searchParams.set("embed", "1");
-  if (currentUser?.email) {
-    checkoutUrl.searchParams.set("checkout[email]", currentUser.email);
-  }
+  checkoutUrl.searchParams.set("checkout[email]", currentUser.email);
 
   if (window.LemonSqueezy) {
     window.LemonSqueezy.Url.Open(checkoutUrl.toString());
@@ -969,6 +978,10 @@ document.getElementById("purchaseLifetimeBtn")?.addEventListener("click", () => 
 
 document.querySelector(".close-paywall")?.addEventListener("click", () => {
   document.getElementById("paywallModal").classList.remove("show");
+});
+
+document.getElementById("upgradeBtn")?.addEventListener("click", () => {
+  showPaywall("Upgrade to Pro");
 });
 
 // --- SUPABASE AUTH ---
@@ -1026,11 +1039,6 @@ async function onAuthStateChange(user) {
     isProUser = data.is_pro;
     // Restore theme from profile (cloud overrides local on sign-in)
     if (data.theme_id) applyThemeById(data.theme_id);
-  }
-
-  // Fallback to local storage if Supabase is_pro is false or missing
-  if (!isProUser && localStorage.getItem("pixy_pro_license")) {
-    isProUser = true;
   }
 
   updateProUI();
@@ -1241,9 +1249,6 @@ function showAuthModal() {
     document.getElementById("authProStatus").textContent = isProUser ? "PRO MEMBER" : "FREE ACCOUNT";
     document.getElementById("authProStatus").className = "auth-pro-status " + (isProUser ? "pro" : "free");
     document.getElementById("authTitle").textContent = "ACCOUNT";
-    // Hide license section if already Pro
-    const licenseSection = document.querySelector(".auth-license-section");
-    if (licenseSection) licenseSection.style.display = isProUser ? "none" : "block";
     // Show manage subscription button for Pro users
     const manageBtn = document.getElementById("manageSubscriptionBtn");
     if (manageBtn) manageBtn.classList.toggle("hidden", !isProUser);
@@ -1321,64 +1326,8 @@ document.getElementById("authSubmitBtn")?.addEventListener("click", async () => 
 document.getElementById("authLogoutBtn")?.addEventListener("click", async () => {
   await signOut();
   isProUser = false;
-  localStorage.removeItem("pixy_pro_license");
   updateProUI();
   document.getElementById("authModal").classList.remove("show");
-});
-
-// License Key Activation
-document.getElementById("activateLicenseBtn")?.addEventListener("click", async () => {
-  const keyInput = document.getElementById("licenseKeyInput");
-  const errorEl = document.getElementById("licenseError");
-  const btn = document.getElementById("activateLicenseBtn");
-  const key = keyInput.value.trim();
-
-  if (!key) {
-    errorEl.textContent = "Please enter a license key.";
-    return;
-  }
-
-  if (!supabaseClient || !currentUser) {
-    errorEl.textContent = "You must be signed in.";
-    return;
-  }
-
-  btn.disabled = true;
-  btn.textContent = "ACTIVATING...";
-  errorEl.textContent = "";
-  errorEl.style.color = "#ff4444";
-
-  try {
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    const response = await fetch("/api/activate-license", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + session.access_token,
-      },
-      body: JSON.stringify({ licenseKey: key }),
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      isProUser = true;
-      localStorage.setItem("pixy_pro_license", key);
-      updateProUI();
-      keyInput.value = "";
-      errorEl.style.color = "var(--btn-active-bg)";
-      errorEl.textContent = "Pro activated!";
-      document.getElementById("authProStatus").textContent = "PRO MEMBER";
-      document.getElementById("authProStatus").className = "auth-pro-status pro";
-    } else {
-      errorEl.textContent = result.error || "Activation failed.";
-    }
-  } catch (e) {
-    errorEl.textContent = "Network error. Try again.";
-  }
-
-  btn.disabled = false;
-  btn.textContent = "ACTIVATE";
 });
 
 // --- HELPER FUNCS ---
