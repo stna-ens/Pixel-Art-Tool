@@ -30,8 +30,8 @@ let bgCtx = null;
 let isProUser = false;
 
 // LemonSqueezy Checkout URLs
-const LS_MONTHLY_URL = "https://pixystudio.lemonsqueezy.com/checkout/buy/64c0ba55-ae8f-40c8-a4ca-be8b909b7cde";
-const LS_LIFETIME_URL = "https://pixystudio.lemonsqueezy.com/checkout/buy/0dba630b-5f1d-4215-85dc-b9f927f2d5bd";
+const LS_MONTHLY_URL = "https://pixystudio.lemonsqueezy.com/checkout/buy/53542ce6-60bd-4d20-b648-2f328ca5cb1c";
+const LS_LIFETIME_URL = "https://pixystudio.lemonsqueezy.com/checkout/buy/fddf5732-0cbf-4a32-9cc6-9a2f69dd307c";
 
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
