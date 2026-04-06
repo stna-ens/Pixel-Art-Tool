@@ -2300,6 +2300,19 @@ input[type="number"] {
   margin-top: 8px;
 }
 
+.auth-manage-btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+  background-color: var(--btn-bg);
+  color: var(--text-main);
+  margin-top: 8px;
+}
+
+.auth-manage-btn.hidden {
+  display: none !important;
+}
+
 .hidden {
   display: none !important;
 }

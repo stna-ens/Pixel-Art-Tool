@@ -1244,6 +1244,9 @@ function showAuthModal() {
     // Hide license section if already Pro
     const licenseSection = document.querySelector(".auth-license-section");
     if (licenseSection) licenseSection.style.display = isProUser ? "none" : "block";
+    // Show manage subscription button for Pro users
+    const manageBtn = document.getElementById("manageSubscriptionBtn");
+    if (manageBtn) manageBtn.classList.toggle("hidden", !isProUser);
   } else {
     // Show sign-in form
     document.getElementById("authForm").classList.remove("hidden");
